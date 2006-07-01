@@ -1,9 +1,9 @@
 # 
-# file: GNUmakefile
+# file: $RCSFile$
 # author: Pawel S. Veselov
 # created: 2002/10/06
-# last modified: 02/10/08
-# version: 1.3
+# last modified: $Date$
+# version: $Revision$
 # 
 
 SRC = src

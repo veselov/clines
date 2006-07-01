@@ -84,7 +84,7 @@ void mysig(int s) {
     
     endwin();
     clear();
-    _exit(0);
+    exit(0);
 }
 
 void fatal(char * fmt, ...) {
@@ -97,7 +97,7 @@ void fatal(char * fmt, ...) {
     vfprintf(stderr, fmt, argp);
     va_end(argp);
 
-    _exit(1);
+    exit(1);
 }
 
 void quit() {
@@ -105,17 +105,19 @@ void quit() {
     fflush(stdout);
     fprintf(stdout, "Scores earned : %d\n", score);
     fflush(stdout);
-    _exit(0);
+    exit(0);
 }
 
 void my_quit() {
 
     int nis, y;
+    /*
     getmaxyx(stdscr, y, nis);
     erase();
     refresh();
     doupdate();
     move(y-1, 0);
+    */
     resetty();
     endwin();
 }
