@@ -29,7 +29,9 @@ int main(int argc, char ** argv) {
 
     board * game;
 
+#ifndef NO_SAVE_TTY
     savetty();
+#endif
 
     signal(3, mysig);
     signal(SIGALRM, mysig);
@@ -116,7 +118,9 @@ void my_quit() {
     refresh();
     doupdate();
     move(y-1, 0);
+#ifndef NO_SAVE_TTY
     resetty();
+#endif
     endwin();
 }
 
