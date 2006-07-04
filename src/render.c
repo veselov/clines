@@ -91,7 +91,9 @@ void render1(board * b, int x, int y) {
 void rinit(board * b) {
 
     int x,y;
+#ifdef CURS_MOUSE
     mmask_t nis;
+#endif
 
     initscr();
     start_color();
@@ -110,7 +112,9 @@ void rinit(board * b) {
 	fatal("%d char tall terminal required\n", b->h*4+1);
     }
 
+#ifdef CURS_MOUSE
     mousemask(BUTTON1_RELEASED, &nis);
+#endif
 
     x = x/b->w;
     y = y/b->h;

@@ -111,13 +111,11 @@ void quit() {
 void my_quit() {
 
     int nis, y;
-    /*
     getmaxyx(stdscr, y, nis);
     erase();
     refresh();
     doupdate();
     move(y-1, 0);
-    */
     resetty();
     endwin();
 }
