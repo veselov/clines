@@ -1,3 +1,23 @@
 
 Console lines
++===========+
 
+Building from distro:
+
+    ./configure
+    make
+    make install
+
+Building from CVS tree
+
+    # these are need to be done only eventually, when .am or .ac change
+    autoheader 
+    aclocal
+    automake -acf
+    autoconf
+    # created all files
+
+    ./configure
+    make
+
+That's it.
