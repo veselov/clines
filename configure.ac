@@ -1,7 +1,8 @@
 AC_INIT(clines, 1.0.1-alpha, vps@manticore.2y.net)
+AC_PREREQ(2.59)
 AM_MAINTAINER_MODE
 AM_INIT_AUTOMAKE
-AC_CONFIG_HEADERS([clines-config.h])
+AC_CONFIG_HEADERS(clines-config.h)
 
 AC_ARG_WITH(curses, [AS_HELP_STRING(--with-curses=auto|curses|ncurses|ncursesw,
     Select curses variant to compile with)],
@@ -61,6 +62,8 @@ else
     ])
 fi
 
+ncurses_direct=0
+
 if test $fixed_curses = 1; then
     hcurses=$ucurses
     AC_CHECK_HEADER($curs_hdr, [], [
@@ -69,8 +72,10 @@ if test $fixed_curses = 1; then
 else
     AC_CHECK_HEADER(ncursesw/ncurses.h, [hcurses=ncursesw], [
         AC_CHECK_HEADER(ncurses/ncurses.h, [hcurses=ncurses], [
-            AC_CHECK_HEADER(curses.h, [hcurses=curses], [
-                AC_MSG_ERROR(Curses headers not found)
+            AC_CHECK_HEADER(ncurses.h, [hcurses=ncurses;ncurses_direct=1], [
+                AC_CHECK_HEADER(curses.h, [hcurses=curses], [
+                    AC_MSG_ERROR(Curses headers not found)
+                ])
             ])
         ])
     ])
@@ -97,6 +102,13 @@ else
     AC_MSG_RESULT([no])
 fi
 
+AC_MSG_CHECKING([for OpenBSD])
+if test `uname` = OpenBSD; then
+    AC_MSG_RESULT([yes, do not use savetty])
+    AC_DEFINE(NO_SAVE_TTY, [], [If set, don't use savetty/resetty])
+else
+    AC_MSG_RESULT([no])
+fi
 
 AC_CHECK_LIB($lcurses, color_set, [], [
     AC_MSG_ERROR([
@@ -120,6 +132,9 @@ ncursesw)
     ;;
 ncurses)
     AC_DEFINE(CURSES_NCURSES, [], [ncurses library])
+    if test $ncurses_direct = 1; then
+        AC_DEFINE(NCURSES_DIRECT, [], [ncurses.h is not in ncurses])
+    fi
     ;;
 curses)
     AC_DEFINE(CURSES_CURSES, [], [curses library])

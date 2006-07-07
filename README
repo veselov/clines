@@ -11,6 +11,7 @@ Building from distro:
 Building from CVS tree
 
     # these are need to be done only eventually, when .am or .ac change
+    # automake min 1.7.8, autoconf min 2.59
     autoheader 
     aclocal
     automake -acf
