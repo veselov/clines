@@ -40,7 +40,11 @@
 #endif
 
 #ifdef CURSES_NCURSES
+#ifdef NCURSES_DIRECT
+#include <ncurses.h>
+#else
 #include <ncurses/ncurses.h>
+#endif
 #endif
 
 #ifdef CURSES_NCURSESW
