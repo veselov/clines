@@ -114,7 +114,7 @@ AC_CHECK_LIB($lcurses, color_set, [], [
     AC_MSG_ERROR([
 Your curses library is so puny it doesn't support colors.
 Please switch to a better curses library. If you are compiling
-on Solaris, one in /usr/xpg4 may be a lot better
+on Solaris, one in /usr/xpg4 may be a lot better, but I could not find it
     ])
 ])
 
