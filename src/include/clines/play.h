@@ -1,6 +1,6 @@
 /*
- * file: $Source$
- * author: $Author$
+ * file: $RCSfile$
+ * author: Pawel S. Veselov
  * created: 2002/10/06
  * last modified: $Date$
  * version: $Revision$
