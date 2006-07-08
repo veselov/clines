@@ -33,7 +33,8 @@ int main(int argc, char ** argv) {
     savetty();
 #endif
 
-    signal(3, mysig);
+    signal(SIGQUIT, mysig);
+    signal(SIGINT, mysig);
     signal(SIGALRM, mysig);
     resume_timer();
 
@@ -125,8 +126,8 @@ void my_quit() {
 }
 
 void resume_timer() {
-    if (!timer.it_interval.tv_usec) {
-	timer.it_interval.tv_usec++;
+    if (!timer.it_value.tv_usec) {
+	timer.it_value.tv_usec++;
     }
     setitimer(ITIMER_REAL, &timer, NULL);
 }
