@@ -1,9 +1,9 @@
 /*
- * file: gameplay.c
- * author: Pawel S. Veselov
+ * file: $Source$
+ * author: $Author$
  * created: 2002/10/06
- * last modified: 02/10/10
- * version: 1.7
+ * last modified: $Date$
+ * version: $Revision$
  */
 
 #include <clines/sysi.h>
@@ -70,6 +70,10 @@ void play(board * b) {
 
 void do_move(board * b) {
 
+#ifdef HAVE_CMOUSE
+    MEVENT mevt;
+#endif
+
     b->sel = -1;
     b->jst = 0;
     c_board = b;
@@ -82,10 +86,13 @@ void do_move(board * b) {
 
 	render1(b, cx, cy);
 
-	c = getch();
+	if ((c = getch())==ERR) { continue; }
+
+        if (c != KEY_MOUSE) {
+            b->con = 1;
+        }
 
 	switch (c) {
-
 	case KEY_DOWN:
 	case 'j':
 	    if (++b->y >= b->h) {
@@ -117,11 +124,35 @@ void do_move(board * b) {
 		b->x = b->w - 1;
 	    }
 	    break;
+#ifdef HAVE_CMOUSE
 	case KEY_MOUSE:
-	    // TODO implement mouse events,
-	    // need xterm to test
-	    abort();
-	    break;
+            {
+                int gmr = getmouse(&mevt);
+                if (gmr != OK || !(mevt.bstate & BUTTON1_RELEASED)) {
+                    continue;
+                }
+
+                int bx, by;
+                
+                // did we hit on the grid ?
+                if (!(mevt.x % b->s) || !(mevt.y % b->s)) {
+                    continue;
+                }
+
+                bx = mevt.x / b->s;
+                by = mevt.y / b->s;
+
+                // out of board ?
+                if (bx >= b->w || by >= b->h) {
+                    continue;
+                }
+
+                b->x = bx;
+                b->y = by;
+
+                b->con = 0;
+            }
+#endif
 	case ' ':
 	    suspend_timer();
             // b->jst = 0; // stop "jumping"

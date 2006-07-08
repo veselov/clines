@@ -1,9 +1,9 @@
 /*
- * file: board.h
- * author: Pawel S. Veselov
+ * file: $Source$
+ * author: $Author$
  * created: 2002/10/06
- * last modified: 02/10/09
- * version: 1.5
+ * last modified: $Date$
+ * version: $Revision$
  */
 
 #ifndef _CLINES_BOARD_H_
@@ -15,11 +15,11 @@ typedef struct pset {
 } pset;
 
 typedef struct board {
-    int	w;
-    int	h;
+    int	w;  // gee, board's width
+    int	h;  // and height
     int	mc; // max colors
     int	ml; // max length
-    int	* board;
+    int	* board;    // state matrix
     int sel;	// selected (linear address)
     int av;	// available cells
     int nev;	// how much chips appear
@@ -32,8 +32,10 @@ typedef struct board {
 
     int jst;    // regulate "jumping"
 
+    int con;    // cursor is visible?
+
     pset * set;
-    pset * rec;	// recent
+    pset * rec;     // recent
     pset * path;    // path to move the ball.
     
 } board;

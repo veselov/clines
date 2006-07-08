@@ -1,9 +1,9 @@
 /*
- * file: play.h
- * author: Pawel S. Veselov
+ * file: $Source$
+ * author: $Author$
  * created: 2002/10/06
- * last modified: 02/10/08
- * version: 1.4
+ * last modified: $Date$
+ * version: $Revision$
  */
 
 #ifndef _CLINES_PLAY_H_

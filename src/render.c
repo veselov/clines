@@ -1,9 +1,9 @@
 /*
- * file: render.c
- * author: Pawel S. Veselov
+ * file: $Source$
+ * author: $Author$
  * created: 2002/10/07
- * last modified: 02/10/08
- * version: 1.5
+ * last modified: $Date$
+ * version: $Revision$
  */
 
 #include <clines/sysi.h>
@@ -79,7 +79,7 @@ void render1(board * b, int x, int y) {
 	}
 	
 	mvhline(st_y+i, st_x+dlt, c, len-dlt*2);
-	if ((cpos == lin)&&i&&(i<(len-1))) {
+	if ((cpos == lin && b->con)&&i&&(i<(len-1))) {
 	    mvhline(st_y+i, st_x+1+dlt, cc, len-2-dlt*2);
 	}
     }
@@ -91,7 +91,7 @@ void render1(board * b, int x, int y) {
 void rinit(board * b) {
 
     int x,y;
-#ifdef CURS_MOUSE
+#ifdef HAVE_CMOUSE
     mmask_t nis;
 #endif
 
@@ -112,14 +112,22 @@ void rinit(board * b) {
 	fatal("%d char tall terminal required\n", b->h*4+1);
     }
 
-#ifdef CURS_MOUSE
+#ifdef HAVE_CMOUSE
     mousemask(BUTTON1_RELEASED, &nis);
+    // timeout(GETCH_DELAY);
 #endif
 
     x = x/b->w;
     y = y/b->h;
 
     b->s = mmin(x, y);
+    /*
+     * should I do that ?
+     * that would mean all squares need to be of odd number of chars
+    if (b->s % 2) {
+        b->s--;
+    }
+    */
 
     for (x=0; x<=b->mc; x++) {
 	init_pair(x, x, 0);
@@ -140,3 +148,4 @@ void rborder(board *b) {
 	mvhline(i*b->s, 1, '-', b->s*b->w-1);
     }
 }
+

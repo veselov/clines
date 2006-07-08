@@ -1,13 +1,15 @@
 /*
- * file: render.h
- * author: Pawel S. Veselov
+ * file: $Source$
+ * author: $Author$
  * created: 2002/10/07
- * last modified: 02/10/07
- * version: 1.2
+ * last modified: $Date$
+ * version: $Revision$
  */
 
 #ifndef _CLINES_RENDER_H_
 #define _CLINES_RENDER_H_
+
+// #define GETCH_DELAY 200
 
 struct board;
 

@@ -1,9 +1,9 @@
 /*
- * file: main.c
- * author: Pawel S. Veselov
+ * file: $Source$
+ * author: $Author$
  * created: 2002/10/06
- * last modified: 02/10/10
- * version: 1.6
+ * last modified: $Date$
+ * version: $Revision$
  */
 
 #include <clines/sysi.h>

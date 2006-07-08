@@ -1,9 +1,9 @@
 /*
- * file: board.c
- * author: Pawel S. Veselov
+ * file: $Source$
+ * author: $Author$
  * created: 2002/10/06
- * last modified: 02/10/08
- * version: 1.3
+ * last modified: $Date$
+ * version: $Revision$
  */
 
 #include <clines/sysi.h>
@@ -16,6 +16,7 @@ void reset(board * b) {
     b->av = b->w * b->h;
     memset(b->board, 0, sizeof(int)*b->av);
     b->sel = -1;
+    b->con = 1;
 }
 
 void add(board * b) {

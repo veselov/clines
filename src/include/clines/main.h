@@ -1,9 +1,9 @@
 /*
- * file: main.h
- * author: Pawel S. Veselov
+ * file: $Source$
+ * author: $Author$
  * created: 2002/10/07
- * last modified: 02/10/10
- * version: 1.4
+ * last modified: $Date$
+ * version: $Revision$
  */
 
 #ifndef _CLINES_MAIN_H_
