@@ -76,6 +76,11 @@
 #include <stdarg.h>
 #endif
 
+#ifdef HAVE_GPM_H
+#include <gpm.h>
+#define GPM
+#endif
+
 #else
 #include <stdio.h>
 #include <string.h>

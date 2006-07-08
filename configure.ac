@@ -46,6 +46,7 @@ AC_CHECK_HEADERS(sys/time.h)
 AC_CHECK_HEADERS(unistd.h)
 AC_HEADER_TIME
 AC_CHECK_HEADERS(stdarg.h)
+AC_CHECK_HEADERS(gpm.h)
 
 if test $fixed_curses = 1; then
     lcurses=$ucurses
@@ -80,6 +81,8 @@ else
         ])
     ])
 fi
+
+AC_CHECK_LIB(gpm, Gpm_Open, [AC_DEFINE(HAVE_GPM, [], [Have gpm support])], [])
 
 if test $lcurses != $hcurses; then
     AC_MSG_WARN(

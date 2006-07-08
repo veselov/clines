@@ -95,6 +95,11 @@ void rinit(board * b) {
     mmask_t nis;
 #endif
 
+#ifdef GPM
+    Gpm_Connect gpm;
+    int gpm_rc;
+#endif
+
     initscr();
     start_color();
     noecho();
@@ -115,6 +120,12 @@ void rinit(board * b) {
 #ifdef HAVE_CMOUSE
     mousemask(BUTTON1_RELEASED, &nis);
     // timeout(GETCH_DELAY);
+#endif
+
+#ifdef GPM
+    gpm_rc = Gpm_Open(&gpm, 0);
+    fprintf(stdout, "gpm_open : %d\n", gpm_rc);
+    getch();
 #endif
 
     x = x/b->w;
