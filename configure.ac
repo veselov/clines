@@ -1,4 +1,4 @@
-AC_INIT(clines, 1.0.1-alpha, vps@manticore.2y.net)
+AC_INIT(clines, 1.0.1a, vps@manticore.2y.net)
 AC_PREREQ(2.59)
 AM_MAINTAINER_MODE
 AM_INIT_AUTOMAKE
