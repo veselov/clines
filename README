@@ -3,12 +3,14 @@ Console lines
 +===========+
 
 Building from distro:
+--------------------
 
     ./configure
     make
     make install
 
-Building from CVS tree
+Building from CVS tree:
+----------------------
 
     # these are need to be done only eventually, when .am or .ac change
     # automake min 1.7.8, autoconf min 2.59
@@ -21,4 +23,58 @@ Building from CVS tree
     ./configure
     make
 
-That's it.
+Playing:
+-------
+
+Keys:
+    LEFT, h             : move cursor one cell to the left
+    RIGHT, l            : move cursor one cell to the right
+    UP, k               : move cursor one cell up
+    DOWN, j             : move curror one cell down
+    SPACE, MouseLeft    : select chip or move jumping chip to selected cell
+    'q'                 : quit
+    Ctrl-L              : redraw screen
+
+Game Rules:
+----------
+
+The game runs on a 9 by 9 board. Every cell of the board can be empty
+or occupied by a chip of a color. There are 5 colors : red, green, blue,
+yellow, and purple (may look different on some terminals). When the game
+starts, three chips are placed on the board randomly. During each turn,
+player can move a chip from one cell to another, given that there is an
+unobstructed path between such two cells, that can be walked by moving
+the chip strictly horizontally or vertically. After the player's move,
+the board is checked for the lengths of adjacent chips of the same color.
+If any such lengths in amount of 5 or more chips are found, all chips
+in these lengths are expelled from the board, the computer skips it's move,
+and control goes back to the player. If no chips were expelled, the computer
+places another 3 chips, choosing random color and position, and the chip
+lenghts are checked for, and expelled if found, again. If there are less than
+3 empty cells at the time computer has to make a move, or no empty cells
+after the computer has made it's move, the game ends.
+
+The objective of the game is to stay in the game as long as possible, by
+preventing the board to get filled up with chips until there is no space left.
+
+Scoring:
+-------
+
+Any time the 5 or more chips of the same color are expelled, points are
+awarded to the player. The points are awarded regardless of whether the
+chips were removed after the player's move, or computer's move.
+
+For every expelled chip up to 5 chips, one point is awarded.
+If more than 5 chips were expelled, then player gets additional points,
+as many as the amount of total chips expelled multiplied by the
+amount of expelled chips over 5.
+
+    5 chips : 5 points
+    n chips (n > 5) : n + n * (n - 5)
+
+(The actual formula used by the game is (N + N * (N - 5)), since no less than
+5 chips can be expelled anyway)
+
+In other words, it's really rewarding to build constructs that make more
+than 5 chips expelled.
+

@@ -84,7 +84,7 @@ fi
 
 AC_CHECK_LIB(gpm, Gpm_Open, [], [])
 
-if test $ac_cv_lib_gpm_Gpm_Open; then
+if test $ac_cv_lib_gpm_Gpm_Open = yes; then
     AC_DEFINE(HAVE_GPM, [], [Have gpm support])
 fi
 
