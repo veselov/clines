@@ -73,6 +73,8 @@ void play(board * b) {
 
 	destroy(b);
 
+        if (!b->av) { break; }
+
 	do {
 	    do_move(b);
 	} while (destroy(b));
