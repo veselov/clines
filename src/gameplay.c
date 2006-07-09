@@ -24,6 +24,10 @@ typedef struct dir {
 typedef int (*m_check)(board *, int);
 typedef int (*m_addr)(board *, int);
 
+// remain outside of #ifdef, to not overcomplicate
+// preprocessor conditions around mouse event recognition
+int has_gpm = 0;
+
 #ifdef HAVE_GPM
 static int has_gpm_event = 0;
 static int gpm_event_x;
@@ -574,4 +578,3 @@ int gpm_getch_bridge() {
 
 #endif
 
-int has_gpm = 0;
