@@ -10,6 +10,12 @@
 #include <clines/board.h>
 #include <clines/render.h>
 #include <clines/main.h>
+#include <clines/play.h>
+
+#ifdef HAVE_GPM
+static Gpm_Event _latest_gpm_event;
+Gpm_Event * latest_gpm_event = &_latest_gpm_event;
+#endif
 
 void render(board * b) {
 
@@ -86,6 +92,17 @@ void render1(board * b, int x, int y) {
 
     color_set(7, NULL);
     move(0,0);
+
+#ifdef HAVE_GPM
+    // must test for !b->con, that means that the text
+    // cursor has been disabled, and mouse cursor should be
+    // displayed, also since text cursor is disabled, at least
+    // one mouse event has had happened !
+    if (has_gpm && !b->con) {
+        GPM_DRAWPOINTER(latest_gpm_event);
+    }
+#endif
+
 }
 
 void rinit(board * b) {
@@ -95,9 +112,8 @@ void rinit(board * b) {
     mmask_t nis;
 #endif
 
-#ifdef GPM
+#ifdef HAVE_GPM
     Gpm_Connect gpm;
-    int gpm_rc;
 #endif
 
     initscr();
@@ -122,10 +138,16 @@ void rinit(board * b) {
     // timeout(GETCH_DELAY);
 #endif
 
-#ifdef GPM
-    gpm_rc = Gpm_Open(&gpm, 0);
-    fprintf(stdout, "gpm_open : %d\n", gpm_rc);
-    getch();
+#ifdef HAVE_GPM
+    gpm.minMod = gpm.maxMod = 0;
+    gpm.eventMask = GPM_UP|GPM_SINGLE|GPM_MOVE;
+    // gpm.defaultMask = GPM_MOVE|GPM_HARD;
+    gpm.defaultMask = 0;
+    has_gpm = Gpm_Open(&gpm, 0) != -1;
+    if (has_gpm) {
+        gpm_handler = my_gpm_handler;
+        timeout(100);   // 10Hz selection
+    }
 #endif
 
     x = x/b->w;

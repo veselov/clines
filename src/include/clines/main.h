@@ -23,5 +23,11 @@ void resume_timer();
 
 extern int score;
 
+#ifdef HAVE_GPM
+extern int has_gpm;
+#endif
+
+typedef int (*f_getch_t)(void);
+
 #endif
 

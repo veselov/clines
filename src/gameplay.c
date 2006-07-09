@@ -12,6 +12,10 @@
 #include <clines/play.h>
 #include <clines/main.h>
 
+#ifndef KEY_MOUSE
+#define KEY_MOUSE 0631
+#endif
+
 typedef struct dir {
     int dx;
     int dy;
@@ -19,6 +23,13 @@ typedef struct dir {
 
 typedef int (*m_check)(board *, int);
 typedef int (*m_addr)(board *, int);
+
+#ifdef HAVE_GPM
+static int has_gpm_event = 0;
+static int gpm_event_x;
+static int gpm_event_y;
+static int gpm_getch_bridge(void);
+#endif
 
 static int c_north(board *, int);
 static int c_south(board *, int);
@@ -70,8 +81,20 @@ void play(board * b) {
 
 void do_move(board * b) {
 
+    f_getch_t f_getch;
+
 #ifdef HAVE_CMOUSE
     MEVENT mevt;
+#endif
+
+#ifdef HAVE_GPM
+    if (has_gpm) {
+        f_getch = gpm_getch_bridge;
+    } else {
+#endif
+        f_getch = getch;
+#ifdef HAVE_GPM
+    }
 #endif
 
     b->sel = -1;
@@ -86,7 +109,7 @@ void do_move(board * b) {
 
 	render1(b, cx, cy);
 
-	if ((c = getch())==ERR) { continue; }
+	if ((c = f_getch())==ERR) { continue; }
 
         if (c != KEY_MOUSE) {
             b->con = 1;
@@ -124,23 +147,42 @@ void do_move(board * b) {
 		b->x = b->w - 1;
 	    }
 	    break;
-#ifdef HAVE_CMOUSE
+#if defined(HAVE_CMOUSE) || defined(HAVE_GPM)
 	case KEY_MOUSE:
             {
-                int gmr = getmouse(&mevt);
-                if (gmr != OK || !(mevt.bstate & BUTTON1_RELEASED)) {
-                    continue;
+                int has_event = 0;
+                int bx=0,by=0;
+#ifdef HAVE_CMOUSE
+                if (!has_gpm) {
+                    int gmr = getmouse(&mevt);
+                    if (gmr != OK || !(mevt.bstate & BUTTON1_RELEASED)) {
+                        continue;
+                    }
+                    bx = mevt.x;
+                    by = mevt.y;
+                    has_event = 1;
                 }
+#endif  /* HAVE_CMOUSE */
 
-                int bx, by;
+#ifdef HAVE_GPM
+                if (has_gpm && has_gpm_event) {
+                    bx = gpm_event_x;
+                    by = gpm_event_y;
+                    has_event = 1;
+                    has_gpm_event = 0;
+                }
+#endif  /* HAVE_GPM */
+
+                // failed to harvest any valid mouse event ?
+                if (!has_event) { continue; }
                 
                 // did we hit on the grid ?
-                if (!(mevt.x % b->s) || !(mevt.y % b->s)) {
+                if (!(bx % b->s) || !(by % b->s)) {
                     continue;
                 }
 
-                bx = mevt.x / b->s;
-                by = mevt.y / b->s;
+                bx /= b->s;
+                by /= b->s;
 
                 // out of board ?
                 if (bx >= b->w || by >= b->h) {
@@ -152,7 +194,7 @@ void do_move(board * b) {
 
                 b->con = 0;
             }
-#endif
+#endif  /* HAVE_CMOUSE || HAVE_GPM */
 	case ' ':
 	    suspend_timer();
             // b->jst = 0; // stop "jumping"
@@ -509,3 +551,27 @@ int p_add(board * b, int no, int tgt) {
 }
 
 board * c_board = NULL;
+
+#ifdef HAVE_GPM
+
+int my_gpm_handler(Gpm_Event * evt, void * nothing) {
+    // only interested in left mouse button release
+
+    memcpy(latest_gpm_event, evt, sizeof(Gpm_Event));
+    GPM_DRAWPOINTER(latest_gpm_event);
+    
+    if (!(evt->type & GPM_UP) ||
+            !(evt->buttons & GPM_B_LEFT)) { return 0; }
+    gpm_event_x = evt->x - 1;
+    gpm_event_y = evt->y - 1;
+    has_gpm_event = 1;
+    return KEY_MOUSE;
+}
+
+int gpm_getch_bridge() {
+    return Gpm_Getch();
+}
+
+#endif
+
+int has_gpm = 0;

@@ -18,4 +18,8 @@ void rinit(struct board *);
 void rborder(struct board *);
 void render1(struct board *, int, int);
 
+#ifdef HAVE_GPM
+extern Gpm_Event * latest_gpm_event;
+#endif
+
 #endif

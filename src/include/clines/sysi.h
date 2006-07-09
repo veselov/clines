@@ -78,7 +78,6 @@
 
 #ifdef HAVE_GPM_H
 #include <gpm.h>
-#define GPM
 #endif
 
 #else

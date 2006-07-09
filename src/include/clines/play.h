@@ -13,6 +13,10 @@ struct board;
 
 void play(struct board *);
 
+#ifdef HAVE_GPM
+int my_gpm_handler(Gpm_Event *, void *);
+#endif
+
 extern struct board * c_board;
 
 #endif

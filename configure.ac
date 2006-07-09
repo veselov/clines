@@ -82,7 +82,11 @@ else
     ])
 fi
 
-AC_CHECK_LIB(gpm, Gpm_Open, [AC_DEFINE(HAVE_GPM, [], [Have gpm support])], [])
+AC_CHECK_LIB(gpm, Gpm_Open, [], [])
+
+if test $ac_cv_lib_gpm_Gpm_Open; then
+    AC_DEFINE(HAVE_GPM, [], [Have gpm support])
+fi
 
 if test $lcurses != $hcurses; then
     AC_MSG_WARN(
@@ -126,7 +130,7 @@ AC_ARG_ENABLE([debug], AS_HELP_STRING([--enable-debug], [Compile with debug (dis
     debug_on=yes
 ], [debug_on=no])
 
-AC_MSG_CHECKING([if debug code should be buit])
+AC_MSG_CHECKING([if debugging should be included])
 AC_MSG_RESULT([$debug_on])
 
 case $hcurses in

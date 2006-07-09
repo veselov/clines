@@ -123,6 +123,9 @@ void my_quit() {
     resetty();
 #endif
     endwin();
+#ifdef HAVE_GPM
+    Gpm_Close();
+#endif
 }
 
 void resume_timer() {
