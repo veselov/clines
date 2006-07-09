@@ -124,7 +124,9 @@ void my_quit() {
 #endif
     endwin();
 #ifdef HAVE_GPM
-    Gpm_Close();
+    if (has_gpm) {
+        Gpm_Close();
+    }
 #endif
 }
 

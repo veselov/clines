@@ -114,6 +114,7 @@ void rinit(board * b) {
 
 #ifdef HAVE_GPM
     Gpm_Connect gpm;
+    int gpm_rc;
 #endif
 
     initscr();
@@ -143,7 +144,11 @@ void rinit(board * b) {
     gpm.eventMask = GPM_UP|GPM_SINGLE|GPM_MOVE;
     // gpm.defaultMask = GPM_MOVE|GPM_HARD;
     gpm.defaultMask = 0;
-    has_gpm = Gpm_Open(&gpm, 0) != -1;
+    has_gpm = (gpm_rc = Gpm_Open(&gpm, 0)) != -1;
+    if (gpm_rc == -2) { // xterm ?? NOOO!
+        Gpm_Close();
+        has_gpm = 0;
+    }
     if (has_gpm) {
         gpm_handler = my_gpm_handler;
         timeout(100);   // 10Hz selection
