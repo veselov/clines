@@ -38,21 +38,21 @@ Keys:
 Game Rules:
 ----------
 
-The game runs on a 9 by 9 board. Every cell of the board can be empty
-or occupied by a chip of a color. There are 5 colors : red, green, blue,
-yellow, and purple (may look different on some terminals). When the game
-starts, three chips are placed on the board randomly. During each turn,
-player can move a chip from one cell to another, given that there is an
-unobstructed path between such two cells, that can be walked by moving
-the chip strictly horizontally or vertically. After the player's move,
-the board is checked for the lengths of adjacent chips of the same color.
-If any such lengths in amount of 5 or more chips are found, all chips
-in these lengths are expelled from the board, the computer skips it's move,
-and control goes back to the player. If no chips were expelled, the computer
-places another 3 chips, choosing random color and position, and the chip
-lenghts are checked for, and expelled if found, again. If there are less than
-3 empty cells at the time computer has to make a move, or no empty cells
-after the computer has made it's move, the game ends.
+The game runs on a 9 by 9 board. Every cell of the board can be empty or
+occupied by a chip of a color. There are 5 colors : red, green, blue, yellow,
+and purple (may look different on some terminals). When the game starts, three
+chips are placed on the board randomly. During each turn, player can move a
+chip from one cell to another, given that there is an unobstructed path between
+such two cells, that can be walked by moving the chip strictly horizontally or
+vertically. After the player's move, the board is checked for the lengths of
+adjacent chips of the same color. If any such lengths in amount of 5 or more
+chips are found (in any direction, horinontal, vertical or diagonal), all chips
+in these lengths are expelled from the board, the computer skips it's move, and
+control goes back to the player. If no chips were expelled, the computer places
+another 3 chips, choosing random color and position, and the chip lenghts are
+checked for, and expelled if found, again. If there are less than 3 empty cells
+at the time computer has to make a move, or no empty cells after the computer
+has made it's move, the game ends.
 
 The objective of the game is to stay in the game as long as possible, by
 preventing the board to get filled up with chips until there is no space left.
