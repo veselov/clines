@@ -67,13 +67,19 @@ chips were removed after the player's move, or computer's move.
 For every expelled chip up to 5 chips, one point is awarded.
 If more than 5 chips were expelled, then player gets additional points,
 as many as the amount of total chips expelled multiplied by the
-amount of expelled chips over 5.
+amount of expelled chips over 5. At the time awarded points are calculated
+additional points may be awarded if the chips are expelled by player's move
+without any news chips being added to the board. This award is square the
+amount of such moves.
 
-    5 chips : 5 points
-    n chips (n > 5) : n + n * (n - 5)
+    5 chips : b + 5 points
+    n chips (n > 5) : b + n + n * (n - 5)
 
-(The actual formula used by the game is (N + N * (N - 5)), since no less than
-5 chips can be expelled anyway)
+n is the amount of chips
+b is the movement award
+
+(The actual formula used by the game is (b + n + n * (n - 5)), since no less
+than 5 chips can be ever expelled)
 
 In other words, it's really rewarding to build constructs that make more
 than 5 chips expelled.

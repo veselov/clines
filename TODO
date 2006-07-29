@@ -1,8 +1,5 @@
 
 For clines 1.0 rel:
 
-* fix bsd/solaris
-* make scores work
 * add configuration parameters
-* add help, may be man page
-* add installation
+* implement shared scoring

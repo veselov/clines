@@ -10,5 +10,12 @@
 
 1.0.2
 
-* complete mouse support
+* completed mouse support
+* completed GPM mouse support
+* explained rules and scoring
+* some minor bug fixes
 
+1.0.3
+
+* added scoring
+* cleaned todo list
