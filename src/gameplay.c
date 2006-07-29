@@ -28,6 +28,8 @@ typedef int (*m_addr)(board *, int);
 // preprocessor conditions around mouse event recognition
 int has_gpm = 0;
 
+static int scored_moves_count = 0;
+
 #ifdef HAVE_GPM
 static int has_gpm_event = 0;
 static int gpm_event_x;
@@ -71,13 +73,19 @@ void play(board * b) {
 	    break;
 	}
 
+        scored_moves_count = 0;
+
 	destroy(b);
 
         if (!b->av) { break; }
 
-	do {
+	while (1) {
 	    do_move(b);
-	} while (destroy(b));
+            if (!destroy(b)) {
+                break;
+            }
+            scored_moves_count++;
+	}
 
 	if (b->av < b->nev) {
 	    break;
@@ -291,7 +299,9 @@ int destroy(board * b) {
     // calculate score
 
     fnd += fnd * (fnd - b->ml);
-    score += fnd;
+    score += (fnd + scored_moves_count * scored_moves_count);
+
+    rscore();
 
     return fnd;
     

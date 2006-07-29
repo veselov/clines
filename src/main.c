@@ -12,6 +12,8 @@
 #include <clines/render.h>
 #include <clines/play.h>
 
+int score;
+
 static void mysig(int);
 static void my_quit(void);
 
@@ -141,4 +143,3 @@ void suspend_timer() {
     setitimer(ITIMER_REAL, &stoptimer, &timer);
 }
 
-int score;

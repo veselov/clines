@@ -21,6 +21,8 @@ void render(board * b) {
 
     int i;
 
+    rscore();
+
     for (i=0; i<(b->h*b->w); i++) {
 	render1(b, i, -1);
     }
@@ -187,3 +189,7 @@ void rborder(board *b) {
     }
 }
 
+void rscore() {
+    move(0, 8);
+    printw("=[ score : %d ]=", score);
+}
