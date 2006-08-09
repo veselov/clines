@@ -12,6 +12,14 @@
 #include <clines/main.h>
 #include <clines/play.h>
 
+int r_can_render = 1;
+int r_has_color;
+static int mini = 0;
+static void render1_mini(board *, int, int);
+static void render1_full(board *, int, int);
+static char get_char_code(int);
+static char get_jumping_code(char);
+
 #ifdef HAVE_GPM
 static Gpm_Event _latest_gpm_event;
 Gpm_Event * latest_gpm_event = &_latest_gpm_event;
@@ -29,6 +37,80 @@ void render(board * b) {
 }
 
 void render1(board * b, int x, int y) {
+    if (mini) {
+        render1_mini(b, x, y);
+    } else {
+        render1_full(b, x, y);
+    }
+
+    color_set(7, NULL);
+    move(0,0);
+
+}
+
+void render1_mini(board * b, int x, int y) {
+
+    int lin;
+    int cpos = b->y * b->w + b->x;
+    int box_len = b->s - 1;
+    char c;
+    int no_draw = -1;
+    int i;
+    
+    if (y < 0) {
+	lin = x;
+	x = lin % b->w;
+	y = lin / b->w;
+    } else {
+	lin = y * b->w + x;
+    }
+
+    if (b->board[lin]) {
+        // TODO : remap the color
+        if (r_has_color) {
+            color_set(b->board[lin], NULL);
+            c = 'O';
+        } else {
+            c = get_char_code(b->board[lin]);
+        }
+    } else {
+        if (r_has_color) {
+            color_set(7, NULL);
+        }
+        c = ' ';
+    }
+
+    if (cpos == lin && b->con) {
+        c = 'I';
+    }
+
+    if (lin == b->sel) {    // the position is selected
+        color_set(b->board[lin], NULL);
+        if (box_len == 1) {
+            if (b->jst % 8 < 4) {
+                if (r_has_color) {
+                    c = tolower(c);
+                } else {
+                    c = get_jumping_code(c);
+                }
+            }
+        } else {
+            int _p = b->jst % 12;
+            if (_p < 3) {
+                no_draw = 0;
+            } else if (_p >= 6 && _p < 9) {
+                no_draw = 1;
+            }
+        }
+    }
+
+    for (i = 0; i<box_len; i++) {
+        char dc = (i==no_draw)?' ':c;
+        mvhline(y*b->s+1+i, x*b->s+1, dc, box_len);
+    }
+}
+
+void render1_full(board * b, int x, int y) {
 
     int lin;
     char c;
@@ -62,10 +144,14 @@ void render1(board * b, int x, int y) {
 	    }
 	}
 
-	c = 'O';
 	cc = ' ';
-	// TODO : here should be color remap
-	color_set(b->board[lin], NULL);
+        if (r_has_color) {
+            // TODO : here should be color remap
+            color_set(b->board[lin], NULL);
+            c = 'O';
+        } else {
+            c = get_char_code(b->board[lin]);
+        }
     } else {
 	color_set(7, NULL);
 	c = ' ';
@@ -80,20 +166,14 @@ void render1(board * b, int x, int y) {
 	int dlt = 0;
 	if (c != ' ') {
 	    mvhline(st_y+i, st_x, ' ', len-dlt);
-	}
-
-	if (c != ' ') {
 	    dlt = abs(len/2 - (i+shift));
 	}
-	
+
 	mvhline(st_y+i, st_x+dlt, c, len-dlt*2);
 	if ((cpos == lin && b->con)&&i&&(i<(len-1))) {
 	    mvhline(st_y+i, st_x+1+dlt, cc, len-2-dlt*2);
 	}
     }
-
-    color_set(7, NULL);
-    move(0,0);
 
 #ifdef HAVE_GPM
     // must test for !b->con, that means that the text
@@ -107,9 +187,10 @@ void render1(board * b, int x, int y) {
 
 }
 
-void rinit(board * b) {
+void rinit(board * b, int first_time) {
 
     int x,y;
+    int bad = 0;
 #ifdef HAVE_CMOUSE
     mmask_t nis;
 #endif
@@ -119,21 +200,68 @@ void rinit(board * b) {
     int gpm_rc;
 #endif
 
+    r_can_render = 1;
+
+    if (!first_time) {
+        suspend_timer();
+        endwin();
+        doupdate();
+    }
+
     initscr();
-    start_color();
+    erase();
+
+    if (first_time) {
+        r_has_color = has_colors();
+    }
+
     noecho();
     keypad(stdscr, TRUE);
 
     getmaxyx(stdscr, y, x);
 
     // fprintf(stderr, "screen size : %d:%d\n", x, y);
+    
+    move(0,0);
 
-    if (x < b->w*4+1) {
-	fatal("%d char wide terminal required\n", b->w*4+1);
+    if (x < b->w*2+1) {
+        if (first_time) {
+            fatal("%d chars wide terminal required, now it's %d\n",
+                    b->w*2+1, x);
+        }
+        printw("%d chars wide terminal required, now it's %d\n",
+                b->w*2+1, x);
+        bad++;
     }
 
-    if (y < b->h*4+1) {
-	fatal("%d char tall terminal required\n", b->h*4+1);
+    if (y < b->h*2+1) {
+        if (first_time) {
+            fatal("%d chars tall terminal required, now it's %d\n",
+                    b->h*2+1, y);
+        }
+        printw("%d chars tall terminal required, now it's %d\n",
+                b->h*2+1, y);
+        bad++;
+    }
+
+    if (first_time && !r_has_color) {
+        printw("Your terminal doesn't support colors !\n"
+                "Try setting your terminal to xterm-color, cxterm, etc.\n"
+                "Press ENTER to continue, Ctrl-C to quit...");
+        getch();
+        erase();
+    }
+
+    if (bad) {
+        printw("Please resize the window again");
+        doupdate();
+        refresh();
+        r_can_render = 0;
+        return;
+    }
+
+    if (r_has_color) {
+        start_color();
     }
 
 #ifdef HAVE_CMOUSE
@@ -142,18 +270,20 @@ void rinit(board * b) {
 #endif
 
 #ifdef HAVE_GPM
-    gpm.minMod = gpm.maxMod = 0;
-    gpm.eventMask = GPM_UP|GPM_SINGLE|GPM_MOVE;
-    // gpm.defaultMask = GPM_MOVE|GPM_HARD;
-    gpm.defaultMask = 0;
-    has_gpm = (gpm_rc = Gpm_Open(&gpm, 0)) != -1;
-    if (gpm_rc == -2) { // xterm ?? NOOO!
-        Gpm_Close();
-        has_gpm = 0;
-    }
-    if (has_gpm) {
-        gpm_handler = my_gpm_handler;
-        timeout(100);   // 10Hz selection
+    if (first_time) {
+        gpm.minMod = gpm.maxMod = 0;
+        gpm.eventMask = GPM_UP|GPM_SINGLE|GPM_MOVE;
+        // gpm.defaultMask = GPM_MOVE|GPM_HARD;
+        gpm.defaultMask = 0;
+        has_gpm = (gpm_rc = Gpm_Open(&gpm, 0)) != -1;
+        if (gpm_rc == -2) { // xterm ?? NOOO!
+            Gpm_Close();
+            has_gpm = 0;
+        }
+        if (has_gpm) {
+            gpm_handler = my_gpm_handler;
+            timeout(100);   // 10Hz selection
+        }
     }
 #endif
 
@@ -161,19 +291,30 @@ void rinit(board * b) {
     y = y/b->h;
 
     b->s = mmin(x, y);
-    /*
-     * should I do that ?
-     * that would mean all squares need to be of odd number of chars
-    if (b->s % 2) {
-        b->s--;
-    }
-    */
 
-    for (x=0; x<=b->mc; x++) {
-	init_pair(x, x, 0);
+    if (b->s<=3) {
+        mini = 1;
+    } else {
+        mini = 0;
     }
 
-    init_pair(7, 7, 0);
+    if (r_has_color) {
+        for (x=0; x<=b->mc; x++) {
+            init_pair(x, x, 0);
+        }
+
+        init_pair(7, 7, 0);
+    }
+
+    if (!first_time) {
+
+        rborder(b);
+        render(b);
+        doupdate();
+        refresh();
+
+        resume_timer();
+    }
 }
 
 void rborder(board *b) {
@@ -190,6 +331,55 @@ void rborder(board *b) {
 }
 
 void rscore() {
-    move(0, 8);
-    printw("=[ score : %d ]=", score);
+
+    if (!score) {
+        return;
+    }
+
+    if (mini) {
+        move(0, 1);
+        printw("[ s: %d ]", score);
+    } else {
+        move(0, 8);
+        printw("=[ score : %d ]=", score);
+    }
+}
+
+char get_jumping_code(char val) {
+    switch (val) {
+        case 'O':
+            return 'o';
+        case 'V':
+            return 'v';
+        case 'A':
+            return 'a';
+        case '.':
+            return '\'';
+        case 'Z':
+            return 'z';
+    }
+
+    fatal("oops! get_jumping_code()val=%d, report to developer\n", (int)val);
+    return 0; // make gcc happy
+}
+
+char get_char_code(int val) {
+
+    switch (val) {
+        case 1:
+            return 'O';
+        case 2:
+            return 'V';
+        case 3:
+            return 'A';
+        case 4:
+            return '.';
+        case 5:
+            return 'Z';
+        case 7:
+            return '*';
+    }
+
+    fatal("oops! get_char_code()val=%d, report to developer\n", val);
+    return 0; // make gcc happy
 }

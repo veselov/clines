@@ -120,6 +120,11 @@ void do_move(board * b) {
 	int c;
 	int cx = b->x;
 	int cy = b->y;
+        
+        if (!r_can_render) {
+            pause();
+            continue;
+        }
 
 	render1(b, cx, cy);
 

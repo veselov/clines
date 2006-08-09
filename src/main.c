@@ -38,6 +38,7 @@ int main(int argc, char ** argv) {
     signal(SIGQUIT, mysig);
     signal(SIGINT, mysig);
     signal(SIGALRM, mysig);
+    signal(SIGWINCH, mysig);
     resume_timer();
 
     game = snew(board);
@@ -59,7 +60,7 @@ int main(int argc, char ** argv) {
     game->path->path = (unsigned char*)malloc(game->w*game->h);
 
     reset(game);
-    rinit(game);
+    rinit(game, 1);
     rborder(game);
 
     score = 0;
@@ -75,16 +76,22 @@ int main(int argc, char ** argv) {
 void mysig(int s) {
 
     if (s == SIGALRM) {
-	if (c_board) {
-	    if (c_board->sel >= 0) {
-		c_board->jst++;
-		render1(c_board, c_board->sel, -1);
-		refresh();
-		doupdate();
-	    }
+	if (c_board && c_board->sel >= 0) {
+            c_board->jst++;
+            render1(c_board, c_board->sel, -1);
+            refresh();
+            doupdate();
 	}
 	signal(s, mysig);
 	return;
+    }
+
+    if (s == SIGWINCH) {
+        if (c_board) {
+            rinit(c_board, 0);
+        }
+        signal(s, mysig);
+        return;
     }
     
     endwin();
@@ -140,6 +147,6 @@ void resume_timer() {
 }
 
 void suspend_timer() {
-    setitimer(ITIMER_REAL, &stoptimer, &timer);
+    setitimer(ITIMER_REAL, &stoptimer, NULL);
 }
 
