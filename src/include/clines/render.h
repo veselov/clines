@@ -14,7 +14,7 @@
 struct board;
 
 void render(struct board *);
-void rinit(struct board *);
+void rinit(struct board *, int);
 void rborder(struct board *);
 void render1(struct board *, int, int);
 void rscore(void);
@@ -22,5 +22,8 @@ void rscore(void);
 #ifdef HAVE_GPM
 extern Gpm_Event * latest_gpm_event;
 #endif
+
+extern int r_can_render;
+extern int r_has_color;
 
 #endif

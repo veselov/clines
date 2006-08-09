@@ -80,6 +80,10 @@
 #include <gpm.h>
 #endif
 
+#ifdef HAVE_CTYPE_H
+#include <ctype.h>
+#endif
+
 #else
 #include <stdio.h>
 #include <string.h>
@@ -90,6 +94,7 @@
 #include <time.h>
 #include <sys/time.h>
 #include <stdarg.h>
+#include <ctype.h>
 #endif
 
 #endif
