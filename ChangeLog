@@ -19,3 +19,9 @@
 
 * added scoring
 * cleaned todo list
+
+1.0.4
+
+* Support smaller terminals (as small as 19x19)
+* Support terminal resize
+* Support B&W terminals

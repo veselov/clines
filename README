@@ -57,20 +57,22 @@ has made it's move, the game ends.
 The objective of the game is to stay in the game as long as possible, by
 preventing the board to get filled up with chips until there is no space left.
 
+If the terminal, or the terminal type, doesn't support colors, instead of
+colors the chips are comprised of characters 'A', 'Z', 'O', '.' and 'V'.
+
 Scoring:
 -------
 
-Any time the 5 or more chips of the same color are expelled, points are
-awarded to the player. The points are awarded regardless of whether the
-chips were removed after the player's move, or computer's move.
+Any time the 5 or more chips of the same color are expelled, points are awarded
+to the player. The points are awarded regardless of whether the chips were
+removed after the player's move, or computer's move.
 
-For every expelled chip up to 5 chips, one point is awarded.
-If more than 5 chips were expelled, then player gets additional points,
-as many as the amount of total chips expelled multiplied by the
-amount of expelled chips over 5. At the time awarded points are calculated
-additional points may be awarded if the chips are expelled by player's move
-without any news chips being added to the board. This award is square the
-amount of such moves.
+For every expelled chip up to 5 chips, one point is awarded. If more than 5
+chips were expelled, then player gets additional points, as many as the amount
+of total chips expelled multiplied by the amount of expelled chips over 5. At
+the time awarded points are calculated additional points may be awarded if the
+chips are expelled by player's move without any news chips being added to the
+board. This award is square the amount of such moves.
 
     5 chips : b + 5 points
     n chips (n > 5) : b + n + n * (n - 5)
