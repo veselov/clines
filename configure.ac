@@ -1,4 +1,4 @@
-AC_INIT(clines, 1.0.3, Pawel.Veselov@gmail.com)
+AC_INIT(clines, 1.0.4, Pawel.Veselov@gmail.com)
 AC_PREREQ(2.59)
 AM_MAINTAINER_MODE
 AM_INIT_AUTOMAKE
@@ -34,17 +34,24 @@ curses)
     AC_MSG_ERROR(Unknown curses library specified : "$ucurses")
     ;;
 esac
-
 AC_MSG_RESULT($ucurses)
+
 AC_CHECK_HEADERS(stdio.h)
 AC_CHECK_HEADERS(string.h)
 AC_CHECK_HEADERS(strings.h)
+AC_CHECK_HEADERS(sys/stat.h)
 AC_CHECK_HEADERS(stdlib.h)
 AC_CHECK_HEADERS(signal.h)
 AC_CHECK_HEADERS(time.h)
 AC_CHECK_HEADERS(sys/time.h)
+AC_CHECK_HEADERS(sys/types.h)
+AC_CHECK_HEADERS(netinet/in.h)
+AC_CHECK_HEADERS(dirent.h)
+AC_CHECK_HEADERS(term.h)
 AC_CHECK_HEADERS(unistd.h)
 AC_CHECK_HEADERS(ctype.h)
+AC_CHECK_HEADERS(fcntl.h)
+AC_CHECK_HEADERS(pwd.h)
 AC_HEADER_TIME
 AC_CHECK_HEADERS(stdarg.h)
 AC_CHECK_HEADERS(gpm.h)
@@ -152,8 +159,11 @@ curses)
     ;;
 esac
 
+CFLAGS="$CFLAGS -DCLINES_DATA_DIR=\\\"\$(pkgdatadir)\\\""
+
 AC_SUBST(CFLAGS)
 AC_SUBST(LDFLAGS)
 
 AC_CONFIG_FILES([Makefile version])
+
 AC_OUTPUT

@@ -25,3 +25,7 @@
 * Support smaller terminals (as small as 19x19)
 * Support terminal resize
 * Support B&W terminals
+* Support command line options
+* Workaround nasty ALTLinux/Debian GPM bug
+* Persist high scores
+
