@@ -16,10 +16,21 @@
 #define KEY_MOUSE 0631
 #endif
 
-typedef struct dir {
+
+#define OP_NONE     0
+#define OP_LEFT     1
+#define OP_RIGHT    2
+#define OP_DOWN     3
+#define OP_UP       4
+#define OP_MOUSE    5
+#define OP_ACT      6
+#define OP_QUIT     7
+#define OP_CLS      8
+
+typedef struct direc {
     int dx;
     int dy;
-} dir;
+} direc;
 
 typedef int (*m_check)(board *, int);
 typedef int (*m_addr)(board *, int);
@@ -57,7 +68,7 @@ static int trymove(board *);
 
 static int p_add(board *, int, int);
 
-static void b_check(board *, dir, int);
+static void b_check(board *, direc, int);
 
 void play(board * b) {
 
@@ -91,6 +102,9 @@ void play(board * b) {
 	    break;
 	}
     }
+
+    rgo(b);
+
 }
 
 void do_move(board * b) {
@@ -120,6 +134,7 @@ void do_move(board * b) {
 	int c;
 	int cx = b->x;
 	int cy = b->y;
+        int op;
         
         if (!r_can_render) {
             pause();
@@ -130,44 +145,60 @@ void do_move(board * b) {
 
 	if ((c = f_getch())==ERR) { continue; }
 
+        op = OP_NONE;
+
         if (c != KEY_MOUSE) {
             b->con = 1;
+        } else {
+            op = OP_MOUSE;
         }
 
-	switch (c) {
-	case KEY_DOWN:
-	case 'j':
+        if (c == KEY_DOWN || c == command_codes[CC_LEFT]) {
+            op = OP_DOWN;
+        } else if (c == KEY_UP || c == command_codes[CC_UP]) {
+            op = OP_UP;
+        } else if (c == KEY_LEFT || c == command_codes[CC_LEFT]) {
+            op = OP_LEFT;
+        } else if (c == KEY_RIGHT || c == command_codes[CC_RIGHT]) {
+            op = OP_RIGHT;
+        } else if (c == command_codes[CC_ACT] && op == OP_NONE) {
+            op = OP_ACT;
+        } else if (c == 'q') {
+            op = OP_QUIT;
+        } else if (c == '') {
+            op = OP_CLS;
+        }
+
+	switch (op) {
+        case OP_DOWN:
 	    if (++b->y >= b->h) {
 		// b->y = 0;
 		b->y = b->h - 1;
 	    }
 	    break;
 
-	case KEY_UP:
-	case 'k':
+        case OP_UP:
 	    if (--b->y < 0) {
 		// b->y = b->h - 1;
 		b->y = 0;
 	    }
 	    break;
 	    
-	case KEY_LEFT:
-	case 'h':
+        case OP_LEFT:
 	    if (--b->x < 0) {
 		// b->x = b->w - 1;
 		b->x = 0;
 	    }
 	    break;
 
-	case KEY_RIGHT:
-	case 'l':
+        case OP_RIGHT:
 	    if (++b->x >= b->w) {
 		// b->x = 0;
 		b->x = b->w - 1;
 	    }
 	    break;
 #if defined(HAVE_CMOUSE) || defined(HAVE_GPM)
-	case KEY_MOUSE:
+        case OP_MOUSE:
             {
                 int has_event = 0;
                 int bx=0,by=0;
@@ -214,7 +245,7 @@ void do_move(board * b) {
                 b->con = 0;
             }
 #endif  /* HAVE_CMOUSE || HAVE_GPM */
-	case ' ':
+        case OP_ACT:
 	    suspend_timer();
             // b->jst = 0; // stop "jumping"
 	    if (bclick(b)) {
@@ -225,9 +256,9 @@ void do_move(board * b) {
 	    }
 	    resume_timer(1);
 	    break;
-	case 'q':
+        case OP_QUIT:
 	    quit();
-	case '':
+        case OP_CLS:
 	    clear();
 	    rborder(b);
 	    render(b);
@@ -246,16 +277,10 @@ int destroy(board * b) {
     int i;
     int fnd = 0;
     
-    int cf1 = 1;
-
-    if (b->rec->len > 1) { // synth
-	cf1 = 2;
-    }
-    
     for (i=0; i<b->rec->len; i++) {
 
 	int pos = (int)b->rec->path[i];
-	dir dr;
+	direc dr;
 
 	dr.dx = 1;
 	dr.dy = 0;
@@ -305,14 +330,21 @@ int destroy(board * b) {
 
     fnd += fnd * (fnd - b->ml);
     score += (fnd + scored_moves_count * scored_moves_count);
+    if (allow_hi_score) {
+        if (score > my_hi_score) {
+            my_hi_score = score;
+        }
+        if (score > hi_score) {
+            hi_score = score;
+        }
+    }
 
-    rscore();
+    rscore(b);
 
     return fnd;
-    
 }
 
-void b_check(board * b, dir dr, int pos) {
+void b_check(board * b, direc dr, int pos) {
 
     int len = 1;
     int x = pos % b->w;
@@ -379,9 +411,7 @@ void b_check(board * b, dir dr, int pos) {
 	dr.dx = -dr.dx;
 	dr.dy = -dr.dy;
     }
-
 }
-
 
 /*
  * returns 1 if chip was moved
@@ -411,12 +441,7 @@ int bclick(board * b) {
 	return 1;
     }
 
-    /*
-    b->sel = -1;
-    render1(b, olds, -1);
-    */
     return 0;
-    
 }
 
 int trymove(board * b) {
@@ -433,8 +458,6 @@ int trymove(board * b) {
 	int col = b->board[old];
 	b->sel = -1;
 	
-	// b->board[target] = b->board[b->sel];
-
 	for (i=b->path->len-1; i>=0; i--) {
 	    b->board[old] = 0;
 	    render1(b, old, -1);
@@ -452,7 +475,7 @@ int trymove(board * b) {
 	render1(b, old, -1);
 	render1(b, target, -1);
 	b->rec->len = 1;
-	b->rec->path[0] = (unsigned char)target;
+	b->rec->path[0] = target;
 	return 1;
     }
     beep();
@@ -546,10 +569,23 @@ int p_add(board * b, int no, int tgt) {
 
     for (i=0; i<nptr; i++) {
 	// was it recorded ?
+        /*
+         * old code : had to be changed when 
+         * b->set->path became integer, not character
 	if (memchr(b->set->path, ngb[i], b->set->len)) {
 	    ngb[i] = -1;
 	    continue;
 	}
+        */
+        int j;
+        for (j=0; j<b->set->len; j++) {
+            if (b->set->path[j] == ngb[i]) {
+                ngb[i] = -1;
+                break;
+            }
+        }
+        if (ngb[i] == -1) { continue; }
+
 
 	if (ngb[i] == tgt) {
 	    return 1;

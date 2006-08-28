@@ -23,13 +23,14 @@ static char get_jumping_code(char);
 #ifdef HAVE_GPM
 static Gpm_Event _latest_gpm_event;
 Gpm_Event * latest_gpm_event = &_latest_gpm_event;
+static TERMINAL * pre_gpm_term;
 #endif
 
 void render(board * b) {
 
     int i;
 
-    rscore();
+    rscore(b);
 
     for (i=0; i<(b->h*b->w); i++) {
 	render1(b, i, -1);
@@ -45,6 +46,23 @@ void render1(board * b, int x, int y) {
 
     color_set(7, NULL);
     move(0,0);
+
+}
+
+void rgo(board * b) {
+
+    // to localize
+    char * str = "Game over, press a key...";
+    int len = strlen(str);
+
+    WINDOW * win = newwin(3, len + 2, 1, 1);
+    wborder(win, '|', '|', '-', '-', '+', '+', '+', '+');
+    wmove(win, 1, 1);
+    wprintw(win, "%s", str);
+
+    doupdate();
+    refresh();
+    wrefresh(win);
 
 }
 
@@ -69,7 +87,7 @@ void render1_mini(board * b, int x, int y) {
         // TODO : remap the color
         if (r_has_color) {
             color_set(b->board[lin], NULL);
-            c = 'O';
+            c = color_font[CF_CHIP];
         } else {
             c = get_char_code(b->board[lin]);
         }
@@ -81,7 +99,7 @@ void render1_mini(board * b, int x, int y) {
     }
 
     if (cpos == lin && b->con) {
-        c = 'I';
+        c = color_font[CF_CURSOR];
     }
 
     if (lin == b->sel) {    // the position is selected
@@ -89,7 +107,7 @@ void render1_mini(board * b, int x, int y) {
         if (box_len == 1) {
             if (b->jst % 8 < 4) {
                 if (r_has_color) {
-                    c = tolower(c);
+                    c = color_font[CF_CHIP_JUMP];
                 } else {
                     c = get_jumping_code(c);
                 }
@@ -187,6 +205,32 @@ void render1_full(board * b, int x, int y) {
 
 }
 
+void rfini() {
+    int nis, y;
+    getmaxyx(stdscr, y, nis);
+    erase();
+    refresh();
+    doupdate();
+    move(y-1, 0);
+
+#ifdef HAVE_GPM
+    if (has_gpm) {
+        Gpm_Close();
+    }
+
+    if (pre_gpm_term != cur_term) {
+        del_curterm(cur_term);
+        set_curterm(pre_gpm_term);
+    }
+#endif
+
+#ifndef NO_SAVE_TTY
+    resetty();
+#endif
+
+    endwin();
+}
+
 void rinit(board * b, int first_time) {
 
     int x,y;
@@ -275,6 +319,7 @@ void rinit(board * b, int first_time) {
         gpm.eventMask = GPM_UP|GPM_SINGLE|GPM_MOVE;
         // gpm.defaultMask = GPM_MOVE|GPM_HARD;
         gpm.defaultMask = 0;
+        pre_gpm_term = cur_term;
         has_gpm = (gpm_rc = Gpm_Open(&gpm, 0)) != -1;
         if (gpm_rc == -2) { // xterm ?? NOOO!
             Gpm_Close();
@@ -287,8 +332,8 @@ void rinit(board * b, int first_time) {
     }
 #endif
 
-    x = x/b->w;
-    y = y/b->h;
+    x = (x-1)/b->w;
+    y = (y-1)/b->h;
 
     b->s = mmin(x, y);
 
@@ -322,7 +367,7 @@ void rborder(board *b) {
     int i;
 
     for (i=0; i<=b->w; i++) {
-	mvvline(0, i*b->s, '|', b->s*b->h);
+	mvvline(0, i*b->s, '|', b->s*b->h+1);
     }
 
     for (i=0; i<=b->h; i++) {
@@ -330,19 +375,39 @@ void rborder(board *b) {
     }
 }
 
-void rscore() {
+void rscore(board *b) {
 
-    if (!score) {
-        return;
+    if (score) {
+        if (mini) {
+            move(0, 1);
+            printw("[ s: %d ]", score);
+        } else {
+            move(0, 8);
+            printw("=[ score : %d ]=", score);
+        }
     }
 
-    if (mini) {
-        move(0, 1);
-        printw("[ s: %d ]", score);
-    } else {
-        move(0, 8);
-        printw("=[ score : %d ]=", score);
+    if (hi_score) {
+
+        mvhline(b->s * b->h, 1, '-', b->s*b->w-1);
+
+        if (mini) {
+            move(b->h * b->s, 1);
+            printw("[ hi : %d ]", hi_score);
+        } else {
+
+            move(b->h * b->s, 8);
+
+            if (hi_score <= my_hi_score) {
+                // it's just me then
+                printw("=[ hi : %d ]=", my_hi_score);
+            } else {
+                printw("=[ hi -- %s:%d you:%d ]=",
+                        hi_score_who, hi_score, my_hi_score);
+            }
+        }
     }
+    
 }
 
 char get_jumping_code(char val) {

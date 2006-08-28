@@ -22,13 +22,14 @@ void reset(board * b) {
 void add(board * b) {
 
     int i;
-    int p[b->nev];
+    int nev = b->played?b->nev:b->first_nev;
+    int p[nev];
     int * ptr = b->board;
-    // int sz = b->w * b->h * sizeof(int);
 
     b->rec->len = 0;
+    b->played = 1;
 
-    for (i=0; i<b->nev; i++) {
+    for (i=0; i<nev; i++) {
 
 	int j;
 
@@ -52,17 +53,17 @@ void add(board * b) {
 	int j;
 	while ((*(ptr++)));
 	ptr--;
-	for (j=0; j<b->nev; j++) {
+	for (j=0; j<nev; j++) {
 	    if (p[j]/b->mc == i) {
 		*ptr = p[j] % b->mc + 1;
 		render1(b, ptr - b->board, -1);
-		b->rec->path[b->rec->len++] = (unsigned char)(ptr-b->board);
+		b->rec->path[b->rec->len++] = (int)(ptr-b->board);
 	    }
 	}
 	ptr++;
     }
 
-    b->av -= b->nev;
+    b->av -= nev;
 }
 
 int myrand(int lim) {
