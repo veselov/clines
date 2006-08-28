@@ -110,7 +110,7 @@ AC_CHECK_LIB($lcurses, mousemask, [AC_DEFINE(HAVE_CMOUSE, [], [Curses mouse supp
 AC_MSG_CHECKING([if we are using standard curses on Solaris])
 if test `uname` = SunOS -a $lcurses = curses; then
     AC_MSG_RESULT([yes, trying xpg4])
-    LDFLAGS="-L/usr/xpg4/lib -R/usr/xpg4/lib $LDFLAGS"
+    LDFLAGS="-L/usr/xpg4/lib -L/usr/xpg4/lib/sparcv9 -R/usr/xpg4/lib/sparcv9 -R/usr/xpg4/lib $LDFLAGS"
     CFLAGS="-I/usr/xpg4/include $CFLAGS"
     AC_DEFINE(NO_SAVE_TTY, [], [If set, don't use savetty/resetty])
 else
