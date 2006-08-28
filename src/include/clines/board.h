@@ -10,8 +10,8 @@
 #define _CLINES_BOARD_H_
 
 typedef struct pset {
-    int	    len;
-    unsigned char * path;
+    int	len;
+    int * path;
 } pset;
 
 typedef struct board {
@@ -24,6 +24,8 @@ typedef struct board {
     int av;	// available cells
     int nev;	// how much chips appear
 		// each turn
+    int first_nev;  // how many chips to start with
+    int played;     // TRUE if at chips were casted
     // rendering
 
     int s;
@@ -35,7 +37,12 @@ typedef struct board {
     int con;    // cursor is visible?
 
     pset * set;
-    pset * rec;     // recent
+    pset * rec;     // recent. This is used to check which chips need to
+                    // be tracked to check for completed lines. So either
+                    // this would be the location of the moved chip, or
+                    // all the locations of chips placed by the computer.
+                    // path[] conatins linear addresses then
+
     pset * path;    // path to move the ball.
     
 } board;

@@ -9,6 +9,8 @@
 #ifndef _CLINES_MAIN_H_
 #define _CLINES_MAIN_H_
 
+#define CSCORE_EXT  ".cscore"
+
 struct board;
 
 #define	snew(x)	    (x*)malloc(sizeof(x))
@@ -22,6 +24,24 @@ void resume_timer();
 #define	mmin(a,b)   ((a)>(b)?(b):(a))
 
 extern int score;
+extern int hi_score;
+extern int my_hi_score;
+extern char * hi_score_who;
+extern int allow_hi_score;
+
+extern char * command_codes;
+#define CC_LEFT     0
+#define CC_DOWN     1
+#define CC_UP       2
+#define CC_RIGHT    3
+#define CC_ACT      4
+
+extern char * color_font;
+#define CF_CURSOR       0
+#define CF_CHIP         1
+#define CF_CHIP_JUMP    2
+
+extern char * bw_font;
 
 #ifdef HAVE_GPM
 extern int has_gpm;

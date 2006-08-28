@@ -19,6 +19,22 @@
 
 #include "clines-config.h"
 
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+
+#ifdef HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif
+
+#ifdef HAVE_DIRENT_H
+#include <dirent.h>
+#endif
+
+#ifdef HAVE_PWD_H
+#include <pwd.h>
+#endif
+
 #ifdef HAVE_STDIO_H
 #include <stdio.h>
 #endif
@@ -31,8 +47,16 @@
 #include <strings.h>
 #endif
 
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
+#endif
+
+#ifdef HAVE_FCNTL_H
+#include <fcntl.h>
 #endif
 
 #ifdef CURSES_CURSES
@@ -57,6 +81,13 @@
 
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
+
+#ifdef HAVE_TERM_H
+#include <term.h>
+#ifdef buttons
+#undef buttons
+#endif // who was so smart to define sys wide 'buttons' define ???
 #endif
 
 #if defined(HAVE_TIME_H) && defined(HAVE_SYS_TIME_H) && defined(TIME_WITH_SYS_TIME)
@@ -93,6 +124,8 @@
 #include <unistd.h>
 #include <time.h>
 #include <sys/time.h>
+#include <sys/types.h>
+#include <dirent.h>
 #include <stdarg.h>
 #include <ctype.h>
 #endif
