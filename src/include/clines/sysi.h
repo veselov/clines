@@ -83,11 +83,13 @@
 #include <unistd.h>
 #endif
 
+#ifdef HAVE_GPM_H   // we only need term.h to resolve GPM's mess
 #ifdef HAVE_TERM_H
 #include <term.h>
 #ifdef buttons
 #undef buttons
 #endif // who was so smart to define sys wide 'buttons' define ???
+#endif
 #endif
 
 #if defined(HAVE_TIME_H) && defined(HAVE_SYS_TIME_H) && defined(TIME_WITH_SYS_TIME)
