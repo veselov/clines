@@ -26,11 +26,14 @@
 int score = 0;
 int hi_score = 0;
 int my_hi_score = 0;
+int color_mode = CM_AUTO;
+int allow_hi_score = 1;
+int * chips_colors;
 char * hi_score_who = (char*)NULL;
 char * my_user = (char*)NULL;
-int allow_hi_score = 1;
-char * command_codes = "hjkl ";
-char * color_font = "IOo";
+char * command_codes = (char*)"hjkl ";
+char * color_font = (char*)"IOo";
+char * bw_font = (char*)NULL;
 
 static int saved_hi_score = 0;
 static int saved = 0;
@@ -41,8 +44,8 @@ static int arg_cpt = 3;
 static int arg_colors = 5;
 static int arg_first_cpt = 3;
 static int arg_cpl = 5;
-static char * arf_bwode;
 static int arg_so = 0;
+static char * arg_color_set = NULL;
 
 static void mysig(int);
 static void load_hi_score(void);
@@ -50,6 +53,7 @@ static void save_hi_score(void);
 static void who_am_i(void);
 static int parse_options(int, char**);
 static void prargs(void);
+static int color_set_checksout(void);
 
 static struct itimerval timer = {
     { 0, 200000 },
@@ -66,6 +70,10 @@ int main(int argc, char ** argv) {
     board * game;
 
     if (parse_options(argc, argv)) {
+        exit(1);
+    }
+
+    if (color_set_checksout()) {
         exit(1);
     }
 
@@ -280,7 +288,6 @@ void load_hi_score() {
     }
 
     closedir(dir);
-
 }
 
 void who_am_i() {
@@ -366,39 +373,45 @@ void prargs() {
 
     fprintf(stdout,
 "clines [-hlv] [-w<N>] [-t<N>] [-c<N>] [-i<N>] [-C<S>]\n"
-"       [-f<S>] [-F<S>] [-m{c|b}] [-n<N>] [-N<N>]\n"
+"       [-f<S>] [-F<S>] [-m{c|b}] [-n<N>] [-N<N>] [-o<C>]\n"
 "\n"
-"  -h           see this help and exit\n"
-"  -l           list high scores and exit\n"
-"  -v           print version number and exit\n"
-"  -w<width>    specify alternative width (default is 9)\n"
-"  -t<height>   specify alternative height (default is 9)\n"
-"  -c<colors>   specify how many colors to use (default is 5)\n"
-"  -i<limit>    specify how long a line is popped (default is 5)\n"
-"  -C<controls> specify characters to expect for controls, in the order of\n"
+"  -h           See this help and exit\n"
+"  -l           List high scores and exit\n"
+"  -v           Print version number and exit\n"
+"  -w<width>    Specify alternative width (default is 9)\n"
+"  -t<height>   Specify alternative height (default is 9)\n"
+"  -c<colors>   Specify how many colors to use (default is 5)\n"
+"  -i<limit>    Specify how long a line is popped (default is 5)\n"
+"  -C<controls> Specify characters to expect for controls, in the order of\n"
 "               left down up right action. Arrow keys will always work\n"
 "               default is \"hjkl \".\n"
-"  -f<chars>    specify characters to use to draw chips and cursor in color\n"
+"  -f<chars>    Specify characters to use to draw chips and cursor in color\n"
 "               mode. Three characters accepted, first is used to draw cursor\n"
 "               second to draw the chips, and the third is to draw selected\n"
 "               chip in mini mode. By default this is \"IOo\"\n"
-"  -F<chars>    specify characters to use to draw chips and cursor in B&W\n"
+"  -F<chars>    Specify characters to use to draw chips and cursor in B&W\n"
 "               mode. First character is always for the cursor then as many\n"
 "               characters as there are chip colors for the drawing chips\n"
 "               and then again for drawing jumped chips in mini mode\n"
 "               By default it's \"*OVA.Zova'z\"\n"
 "  -n<number>   How many chips appear after every move (default is 3)\n"
 "  -N<number>   How many chips appear the first time (default is 3)\n"
+"  -o<colors>   Specify comma separated color numbers to use for the chips.\n"
+"               By default it's 7,1,2,3,4,5. The first color is always a\n"
+"               cursor color. The rest is for the chips. If the amount of\n"
+"               different chips is changed, then, by default, the colors are\n"
+"               assigned in the same manner, white (7) assigned for cursor\n"
+"               and then colors starting from 1 are assigned for chips\n"
+"               if the assigned color is white (7), it's skipped over.\n"
 "\n"
 "If board is customized, hi scores will not be loaded or saved\n");
-
 }
 
 int parse_options(int argc, char ** argv) {
 
     int c;
 
-    while ( (c = getopt(argc, argv, "hlvw:t:c:i:C:f:F:m:n:N:")) != -1) {
+    while ( (c = getopt(argc, argv, "hlvw:t:c:i:C:f:F:m:n:N:o:")) != -1) {
 
         switch (c) {
 
@@ -487,13 +500,138 @@ int parse_options(int argc, char ** argv) {
                 color_font = strdup(optarg);
                 break;
             case 'F':   // b&w font
+                if (!optarg) {
+                    fprintf(stdout, "Black & white font not specified\n");
+                    return 1;
+                }
+                bw_font = strdup(optarg);
+                break;
             case 'm':   // lock mode
+                if (!optarg) {
+                    fprintf(stdout, "No color mode specified for -m\n");
+                    return 1;
+                }
+
+                switch (*optarg) {
+                    case 'c':
+                    case 'C':
+                        color_mode = CM_COLOR;
+                        break;
+                    case 'b':
+                    case 'B':
+                        color_mode = CM_BW;
+                        break;
+                    default:
+                        fprintf(stdout, "Unknown color mode %s\n", optarg);
+                        return 1;
+                }
+                break;
+            case 'o':
+                if (!optarg) {
+                    fprintf(stdout, "No colors specified for -b\n");
+                    return 1;
+                }
+                arg_color_set = strdup(optarg);
+                break;
             default:
                 return 1;
-
         }
-
     }
     return 0;
-    
+}
+
+int color_set_checksout() {
+
+    chips_colors = (int*)malloc(sizeof(int) * (arg_colors+1));
+
+    if (!arg_color_set) {
+        int i;
+        int color = 1;
+        
+        chips_colors[0] = COLOR_WHITE;
+        for (i=1; i<arg_colors+1; i++, color++) {
+            if (color == COLOR_WHITE) { color++; }
+            chips_colors[i] = color;
+        }
+
+        return 0;
+
+    } else {
+
+        int idx = 0;
+        char * ptr = arg_color_set;
+        char * aptr;
+        char * nptr;
+        int had_dups = 0;
+        char * aux = strdup(arg_color_set);
+        int i;
+
+        while (1) {
+
+            nptr = strchr(ptr, ',');
+
+            if (nptr) { *nptr = 0; }
+
+            while (*ptr && (*ptr < '0'||*ptr > '9')) {
+                ptr++;
+            }
+
+            if (!*ptr) {
+                break;
+            }
+
+            chips_colors[idx] = strtol(ptr, &aptr, 10);
+
+            if (ptr == nptr) {
+                fprintf(stdout, "Failed to parse colors in %s\n", aux);
+                free(aux);
+                return 1;
+            }
+
+            if (chips_colors[idx] == COLOR_BLACK) {
+                fprintf(stdout, "Can't use black color for chips : "
+                        "(parsing %s)\n", aux);
+                free(aux);
+                return 1;
+            }
+
+            for (i=0; i<idx; i++) {
+                if (chips_colors[idx] == chips_colors[i]) {
+                    fprintf(stdout, "Duplicate color %d, in positions "
+                            "%d and %d (parsing %s)\n",
+                            chips_colors[idx], idx+1, i+1, aux);
+                    had_dups = 1;
+                    break;
+                }
+            }
+
+            idx++;
+
+            if (idx == arg_colors + 1) {
+                break;
+            }
+
+            if (!nptr) { break; }
+
+            ptr = nptr + 1;
+        }
+
+        if (idx < arg_colors + 1) {
+            fprintf(stdout, "Not enough colors given (%d), "
+                    "need %d (parsing %s)\n",
+                    idx, arg_colors + 1, aux);
+            free(aux);
+            return 1;
+        }
+
+        if (had_dups) {
+            char ara[20];
+            fprintf(stdout, "Press ENTER to continue, Ctrl-C to stop...");
+            fgets(ara, 15, stdin);
+        }
+
+        free(aux);
+        return 0;
+
+    }
 }

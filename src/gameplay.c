@@ -269,8 +269,8 @@ void do_move(board * b) {
     }
 }
 
-#define HBIT	0x800
-#define HMSK	~0x800
+#define HBIT	0x8000
+#define HMSK	~0x8000
 
 int destroy(board * b) {
 
@@ -302,7 +302,7 @@ int destroy(board * b) {
 
     for (i=0; i<(b->w*b->h); i++) {
 	if (b->board[i] & HBIT) {
-	    b->board[i] = 7;
+	    b->board[i] = 1;
 	    render1(b, i, -1);
 	    fnd++;
 	}
@@ -318,7 +318,7 @@ int destroy(board * b) {
 
     for (i=0; i<(b->w*b->h); i++) {
 
-	if (b->board[i] == 7) {
+	if (b->board[i] == 1) {
 	    b->board[i] = 0;
 	    render1(b, i, -1);
 	}

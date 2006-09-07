@@ -18,7 +18,8 @@ static int mini = 0;
 static void render1_mini(board *, int, int);
 static void render1_full(board *, int, int);
 static char get_char_code(int);
-static char get_jumping_code(char);
+static char get_jumping_code(int);
+static void bw_font_checks_out(board *);
 
 #ifdef HAVE_GPM
 static Gpm_Event _latest_gpm_event;
@@ -44,7 +45,7 @@ void render1(board * b, int x, int y) {
         render1_full(b, x, y);
     }
 
-    color_set(7, NULL);
+    color_set(1, NULL);
     move(0,0);
 
 }
@@ -93,7 +94,7 @@ void render1_mini(board * b, int x, int y) {
         }
     } else {
         if (r_has_color) {
-            color_set(7, NULL);
+            color_set(1, NULL);
         }
         c = ' ';
     }
@@ -109,7 +110,7 @@ void render1_mini(board * b, int x, int y) {
                 if (r_has_color) {
                     c = color_font[CF_CHIP_JUMP];
                 } else {
-                    c = get_jumping_code(c);
+                    c = get_jumping_code(b->board[lin]);
                 }
             }
         } else {
@@ -166,14 +167,14 @@ void render1_full(board * b, int x, int y) {
         if (r_has_color) {
             // TODO : here should be color remap
             color_set(b->board[lin], NULL);
-            c = 'O';
+            c = color_font[CF_CHIP];
         } else {
             c = get_char_code(b->board[lin]);
         }
     } else {
-	color_set(7, NULL);
+	color_set(1, NULL);
 	c = ' ';
-	cc = 'I';
+	cc = color_font[CF_CURSOR];
     }
 
     st_x = x * b->s + 1;
@@ -256,7 +257,21 @@ void rinit(board * b, int first_time) {
     erase();
 
     if (first_time) {
-        r_has_color = has_colors();
+        switch (color_mode) {
+        case CM_AUTO:
+            r_has_color = has_colors();
+            break;
+        case CM_BW:
+            r_has_color = 0;
+            break;
+        case CM_COLOR:
+            r_has_color = 1;
+            break;
+        default:
+            fprintf(stderr, "color_mode is %d!\n", color_mode);
+            abort();
+            break;
+        }
     }
 
     noecho();
@@ -288,12 +303,16 @@ void rinit(board * b, int first_time) {
         bad++;
     }
 
-    if (first_time && !r_has_color) {
+    if (first_time && !r_has_color && color_mode == CM_AUTO) {
         printw("Your terminal doesn't support colors !\n"
                 "Try setting your terminal to xterm-color, cxterm, etc.\n"
                 "Press ENTER to continue, Ctrl-C to quit...");
         getch();
         erase();
+    }
+
+    if (!r_has_color && first_time) {
+        bw_font_checks_out(b);
     }
 
     if (bad) {
@@ -344,11 +363,12 @@ void rinit(board * b, int first_time) {
     }
 
     if (r_has_color) {
-        for (x=0; x<=b->mc; x++) {
-            init_pair(x, x, 0);
-        }
 
-        init_pair(7, 7, 0);
+        init_pair(1, chips_colors[0], COLOR_BLACK);
+        
+        for (x=0; x<b->mc; x++) {
+            init_pair(x+2, chips_colors[x+1], COLOR_BLACK);
+        }
     }
 
     if (!first_time) {
@@ -410,41 +430,27 @@ void rscore(board *b) {
     
 }
 
-char get_jumping_code(char val) {
-    switch (val) {
-        case 'O':
-            return 'o';
-        case 'V':
-            return 'v';
-        case 'A':
-            return 'a';
-        case '.':
-            return '\'';
-        case 'Z':
-            return 'z';
-    }
-
-    fatal("oops! get_jumping_code()val=%d, report to developer\n", (int)val);
-    return 0; // make gcc happy
+char get_jumping_code(int val) {
+    return bw_font[(val-1) * 2 + 1];
 }
 
 char get_char_code(int val) {
+    return bw_font[val-1];
+}
 
-    switch (val) {
-        case 1:
-            return 'O';
-        case 2:
-            return 'V';
-        case 3:
-            return 'A';
-        case 4:
-            return '.';
-        case 5:
-            return 'Z';
-        case 7:
-            return '*';
+void bw_font_checks_out(board * b) {
+
+    if (!bw_font) {
+        // no user spec
+        if (b->mc > 5) {
+            fatal("Custom B&W font must be specified along (use -F)\n");
+        } else {
+            bw_font = DEFAULT_BW_FONT;
+        }
+        return;
     }
 
-    fatal("oops! get_char_code()val=%d, report to developer\n", val);
-    return 0; // make gcc happy
+    if (strlen(bw_font) < (b->mc * 2) + 1) {
+        fatal("Not enough characters in B&W font, need %d\n", (b->mc*2)+1);
+    }
 }

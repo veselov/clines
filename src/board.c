@@ -55,7 +55,7 @@ void add(board * b) {
 	ptr--;
 	for (j=0; j<nev; j++) {
 	    if (p[j]/b->mc == i) {
-		*ptr = p[j] % b->mc + 1;
+		*ptr = p[j] % b->mc + 2;
 		render1(b, ptr - b->board, -1);
 		b->rec->path[b->rec->len++] = (int)(ptr-b->board);
 	    }
@@ -67,6 +67,6 @@ void add(board * b) {
 }
 
 int myrand(int lim) {
-    // from linux rand(3)
+    // from linux rand(3) manual page
     return (int) ((float)lim*rand()/(RAND_MAX+1.0));
 }
