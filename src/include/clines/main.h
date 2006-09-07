@@ -41,7 +41,15 @@ extern char * color_font;
 #define CF_CHIP         1
 #define CF_CHIP_JUMP    2
 
+extern int color_mode;
+#define CM_AUTO     0
+#define CM_BW       1
+#define CM_COLOR    2
+
 extern char * bw_font;
+#define DEFAULT_BW_FONT     "*OVA.Zova'z"
+
+extern int * chips_colors;
 
 #ifdef HAVE_GPM
 extern int has_gpm;
