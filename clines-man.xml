@@ -1,0 +1,32 @@
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook V3.1//EN"
+  "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd">
+<refentry id="clines">
+
+<refmeta>
+<refentrytitle>clines</refentrytitle>
+<manvolnum>6</manvolnum>
+</refmeta>
+
+<refnamediv>
+<refname>clines</refname>
+<refpurpose>Console Lines Game</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv/>
+<cmdsynopsis>
+<command>clines</command>
+<arg choice="opt">
+  <option>aAbcCdfFgilLmnopqrRstux1</option>
+</arg>
+<arg choice="opt" rep="repeat">file</arg>
+</cmdsynopsis>
+
+<refsect1><title>Description</title>
+<para>
+For each file that is a directory, <command>ls</command> lists the contents of
+the directory; for each file that is an ordinary file, <command>ls</command>
+repeats its name and any other information requested.
+</para>
+<para>&hellip;</para>
+</refsect1>
+</refentry>
