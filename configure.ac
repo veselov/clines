@@ -138,6 +138,10 @@ AC_ARG_ENABLE([debug], AS_HELP_STRING([--enable-debug], [Compile with debug (dis
     debug_on=yes
 ], [debug_on=no])
 
+AC_ARG_ENABLE([hiscores], AS_HELP_STRING([--enable-hiscores],
+        [Enable hi scores (enable by default)]),
+    [], [enable_hiscores=yes])
+
 AC_MSG_CHECKING([if debugging should be included])
 AC_MSG_RESULT([$debug_on])
 
@@ -158,6 +162,11 @@ curses)
     AC_MSG_FAILURE([Internal error : incorrect curses headers var : "$hcurses"])
     ;;
 esac
+
+if test "x$enable_hiscores" = "xyes"; then
+    AC_DEFINE(ALLOW_HI_SCORES, [], [whether hi scores are supported])
+fi
+
 
 CFLAGS="$CFLAGS -DCLINES_DATA_DIR=\\\"\$(pkgdatadir)\\\""
 

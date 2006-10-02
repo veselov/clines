@@ -1,32 +1,345 @@
-<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook V3.1//EN"
-  "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd">
-<refentry id="clines">
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.4//EN"
+"http://www.oasis-open.org/docbook/xml/4.4/docbookx.dtd">
+<book>
+  <reference>
+    <title>Clines MAN page</title>
 
-<refmeta>
-<refentrytitle>clines</refentrytitle>
-<manvolnum>6</manvolnum>
-</refmeta>
+    <refentry>
+      <refmeta>
+        <refentrytitle>clines</refentrytitle>
 
-<refnamediv>
-<refname>clines</refname>
-<refpurpose>Console Lines Game</refpurpose>
-</refnamediv>
+        <manvolnum>6</manvolnum>
+      </refmeta>
 
-<refsynopsisdiv/>
-<cmdsynopsis>
-<command>clines</command>
-<arg choice="opt">
-  <option>aAbcCdfFgilLmnopqrRstux1</option>
-</arg>
-<arg choice="opt" rep="repeat">file</arg>
-</cmdsynopsis>
+      <refnamediv>
+        <refname>clines</refname>
 
-<refsect1><title>Description</title>
-<para>
-For each file that is a directory, <command>ls</command> lists the contents of
-the directory; for each file that is an ordinary file, <command>ls</command>
-repeats its name and any other information requested.
-</para>
-<para>&hellip;</para>
-</refsect1>
-</refentry>
+        <refpurpose>Console Lines Game</refpurpose>
+      </refnamediv>
+
+      <refsynopsisdiv>
+        <cmdsynopsis>
+          <command>clines</command>
+
+          <arg choice="opt"><option>-hlv</option></arg>
+
+          <arg choice="opt"><option>-w<replaceable
+          class="parameter">N</replaceable></option></arg>
+
+          <arg choice="opt"><option>-t<replaceable
+          class="parameter">N</replaceable></option></arg>
+
+          <arg choice="opt"><option>-c<replaceable
+          class="parameter">N</replaceable></option></arg>
+
+          <arg choice="opt"><option>-i<replaceable
+          class="parameter">N</replaceable></option></arg>
+
+          <arg
+          choice="opt"><option>-C<replaceable>S</replaceable></option></arg>
+
+          <arg choice="opt"><option>-f<replaceable
+          class="parameter">S</replaceable></option></arg>
+
+          <arg choice="opt"><option>-F<replaceable
+          class="parameter">S</replaceable></option></arg>
+
+          <group choice="opt">
+            <arg>-mb</arg>
+
+            <arg>-mc</arg>
+          </group>
+
+          <arg
+          choice="opt"><option>-n<replaceable>N</replaceable></option></arg>
+
+          <arg
+          choice="opt"><option>-N<replaceable>N</replaceable></option></arg>
+
+          <arg
+          choice="opt"><option>-o<replaceable>C</replaceable></option></arg>
+        </cmdsynopsis>
+      </refsynopsisdiv>
+
+      <refsect1>
+        <title>Description</title>
+
+        <para>CLines is a console puzzle game.</para>
+
+        <refsect2>
+          <title>Game Rules</title>
+
+          <para>The game runs on a rectangular board, with evenly distributed
+          cells. By default, the board consists of 9 by 9 cells. Every cell
+          can be either empty or occupied by a chip. At the start of the game,
+          a fixed number of chips (3 by default) is randomly thrown on the
+          board. The turn is then given to the player. Every turn, player has
+          to select a chip and move it onto a free cell on the board, and
+          there has to be an unobscured path between the selected chip and the
+          selected empty cell, having the chip only moving vertically or
+          horizontally. After the player's turn, the whole board is scanned to
+          determine if any chips of the same color form a long enough straight
+          line (by default 5 chips), then all such chips are removed from the
+          board. When the chips are considered for removal, a single chip may
+          be a part of one or more straight lines. If at least one chip was
+          removed, the control is immediately returned to the player.
+          Otherwise the computer then makes it's turn, throwing more chips on
+          the board (again, 3 by default). Then the board is again checked for
+          any lines of chips to remove, before returning the turn to the
+          player. The objective of the game is to prevent the board from
+          filling up completely for as long as possible. The game ends when
+          computer doesn't have enough room to place all chips for it's
+          move.</para>
+        </refsect2>
+
+        <refsect2>
+          <title>Scoring</title>
+
+          <para>Anytime chips are removed from the board, the players receives
+          points. There is a minimum limit of chips required to be in a line
+          to be removed at all (5 by default). The points are awarded, whether
+          the chips are removed after the player's or computer's move. For
+          every expelled chip, up to the minimum amount, one point is awarded.
+          If more than minimum amount of chips were removed, then player gets
+          additional points, as many as there are chips removed, multiplied by
+          the amount of the extra chips removed. If the player is successful
+          in removing any chips for two or more turns consecutively,
+          additional points also awarded, in the amount of such moves minus
+          one, squared. So, the total amount of awarded points is:</para>
+
+          <para><code>b * b + n * (n - min)</code></para>
+
+          <para>Where <itemizedlist>
+              <listitem>
+                <para><varname>min</varname> is the minimum elements in a
+                line</para>
+              </listitem>
+
+              <listitem>
+                <para><varname>n</varname> is the amount of chips being
+                removed this turn</para>
+              </listitem>
+
+              <listitem>
+                <para><varname>b</varname> is the award for consecutive
+                scoring (0 for first turn, 1 for second, etc.).</para>
+              </listitem>
+            </itemizedlist>In other words, it's better to remove chips in
+          consecutive turns, without letting computer to take it's turn, and
+          it's really sweet to remove large clusters of chips. The most usual
+          example of a larger cluster is to either have a very long straight
+          line, or to have one or more lines join at a single cell, where the
+          chip is placed last, like building a letter <literal>V</literal>,
+          filling in the bottom tip in the very end.</para>
+
+          <para>If so compiled and configured, the game will save it's high
+          score for every user who plays the game. The top high score is
+          displayed below the game board. Players score are always displayed
+          in the left top corner, if any. When the game ends, the players
+          latest score is saved as a personal record, if beaten. If the game's
+          confiugration is changed from the defaults (one of
+          <option>wtcinN</option> options specified with a non-default value),
+          the high score function is disabled. The record score is saved when
+          the game stops because player looses the game, or player decides
+          quits the game (including stopping the game with
+          <constant>SIGQUIT</constant> or <constant>SIGINT</constant>
+          signals).</para>
+        </refsect2>
+
+        <refsect2>
+          <title>Game Control</title>
+
+          <para>The game is controlled with the keyboard or mouse, if your
+          curses library has mouse support (or running on some UNIX(tm)
+          console with running <productname>gpm</productname>). If you see the
+          mouse cursor, that may not mean that the game can be controlled with
+          the mouse. To determine if it can be, move your mouse pointer over
+          the middle of any empty cell on the board, and click left mouse
+          button. If the text cursor dissapears, you can control the game with
+          the mouse. With the mouse, the interface is simple, point and click
+          on the chip you would like to move, then click on another chip to
+          change you mind, on the same chip to clear the selection, or to an
+          empty cell to move the chip. If the selected empty cell has no
+          unobscured path from the cell with the selected chip is, the game
+          will beep (depending on your curses library, terminal, and audio
+          device support), and the chip will remain selected. Selected chip is
+          "jumping" in it's cell. With keyboard, by default, the keyboard
+          arrow buttons should move the cursor around. Space bar either
+          selects a chip, clears the current selection, or moves currently
+          selected chip to an unoccupied cell. Attempt to select a chip when
+          another chip is already selected simply changes the currently
+          selected chip. The cursor arrows are duplicated with
+          <literal>h</literal> to move left, <literal>l</literal> to move
+          right, <literal>k</literal> to move up, and <literal>j</literal> to
+          move down. The key <literal>q</literal> stops the program.</para>
+        </refsect2>
+      </refsect1>
+
+      <refsect1>
+        <title>Options</title>
+
+        <para>Various options can be passed to the game program to modify the
+        conditions of the game, or it's presentation.</para>
+
+        <refsect2>
+          <title><option>-h</option></title>
+
+          <para>A short help message is displayed, and program
+          terminates.</para>
+        </refsect2>
+
+        <refsect2>
+          <title><option>-l</option></title>
+
+          <para>Currently record high scores are displayed, and program
+          terminates.</para>
+        </refsect2>
+
+        <refsect2>
+          <title><option>-v</option></title>
+
+          <para>Version information is displayed, and program
+          terminates.</para>
+        </refsect2>
+
+        <refsect2>
+          <title><option>-w <replaceable
+          class="parameter">&lt;number&gt;</replaceable></option></title>
+
+          <para>Specify board width (default is is
+          <constant>9</constant>).</para>
+
+          <para>Since both <option>-t</option> and <option>-w</option> options
+          change the size of the board, it can be displayed differently on
+          your terminal. It's possible your terminal would have not enough
+          width or height to display the board, in which case an error message
+          will be displayed. If the terminal is resized during the gameplay,
+          the board will be redisplayed, unless it doesn't fit into the new
+          terminal size. In this case a corresponding message will be
+          displayed, and game will not resume until the terminal is resized
+          properly. If only one character can be used to display a cell, game
+          work in the "mini mode", which changes how the chips behave when
+          they are selected.</para>
+        </refsect2>
+
+        <refsect2>
+          <title><option>-t <replaceable
+          class="parameter">&lt;number&gt;</replaceable></option></title>
+
+          <para>Specify board height (default is
+          <constant>9</constant>).</para>
+        </refsect2>
+
+        <refsect2>
+          <title><option>-c <replaceable
+          class="parameter">&lt;number&gt;</replaceable></option></title>
+
+          <para>Specify how many colors to use (default is
+          <constant>5</constant>).</para>
+
+          <para>Note that most commonly used terminals have limit on how many
+          colors they can define and display distinctly. Specifying too large
+          value here may lead to an error message if the colors can not be
+          allocated, or may result in chips of different colors to look the
+          same to the user. If the game runs in black and way mode, and the
+          specifed value is over the default, then the <option>-F</option>
+          option must also be specified to provide a custom font.</para>
+        </refsect2>
+
+        <refsect2>
+          <title><option>-i <replaceable
+          class="parameter">&lt;number&gt;</replaceable></option></title>
+
+          <para>Specify the minimum number of chips that can be removed if
+          aligned in a straight line (default is <constant>5</constant>). Now,
+          setting this value to anything that is larger than width or height
+          of the board will effectively make it impossible to score any
+          points.</para>
+        </refsect2>
+
+        <refsect2>
+          <title><option>-C <replaceable
+          class="parameter">&lt;string&gt;</replaceable></option></title>
+
+          <para>Specify the characters to be used to perform the game actions
+          in the order of LEFT, DOWN, UP, RIGHT, ACTION. The default is
+          <constant>"hjkl "</constant>. The behavior of the character
+          <constant>q</constant> can be overwritten by this option, in which
+          case use <keycap>Ctrl</keycap>-<keycap>C</keycap> or
+          <keycap>Ctrl</keycap>-<keycap>\</keycap> to quit the game.</para>
+        </refsect2>
+
+        <refsect2>
+          <title><option>-f <replaceable
+          class="parameter">&lt;string&gt;</replaceable></option></title>
+
+          <para>Specify color "font". The specified string should be three
+          characters long. First character is used to draw cursor, second
+          character is used to draw the chips, and the third is used to draw
+          selected chips in the mini mode. The default is
+          <constant>"IOo"</constant>. This option is ignored in black and
+          white mode.</para>
+        </refsect2>
+
+        <refsect2>
+          <title><option>-F <replaceable
+          class="parameter">&lt;string&gt;</replaceable></option></title>
+
+          <para>Specify black and white "font". The first character in the
+          specified string is used to draw the cursor. The rest of the string
+          specify characters to use for each different "color" of the chip.
+          One character for regular display, another for displaying jumping
+          chip in the mini mode. The default is
+          <constant>"*OoVvAa.'Zz"</constant>. This option is ignored in the
+          color mode. There should be enough character for the specified
+          number of various chips. This option has to be specified if
+          <option>-c</option> option was specified and has a value larger than
+          the default.</para>
+        </refsect2>
+
+        <refsect2>
+          <title><option>-n <replaceable
+          class="parameter">&lt;string&gt;</replaceable></option></title>
+
+          <para>Specify how many chips appear after every computer turn,
+          except for the initial turn. Default is
+          <constant>3</constant>.</para>
+        </refsect2>
+
+        <refsect2>
+          <title><option>-N <replaceable
+          class="parameter">&lt;number&gt;</replaceable></option></title>
+
+          <para>Specify how many chips to appear before player's first move.
+          Default is <constant>3</constant>. This has to be at least
+          <constant>1</constant>.</para>
+        </refsect2>
+
+        <refsect2>
+          <title><option>-o <replaceable
+          class="parameter">&lt;colors&gt;</replaceable></option></title>
+
+          <para>Specify comma separated color numbers to use for chips and
+          cursor, in color mode only. By default it's
+          <constant>7,1,2,3,4,5</constant>. The first color is always for the
+          cursor. The rest are for chips. If the amount of various chips is
+          changed through <option>-c</option> option, then, by default, the
+          colors are assigned to the chips in the same manner: white (7)
+          assigned for the cursor, and then consecutive colors, starting from
+          1 and up are assigned to the chips, skipping over white
+          color.</para>
+        </refsect2>
+
+        <refsect2>
+          <title><option>-m <replaceable
+          class="parameter">{c|b}</replaceable></option></title>
+
+          <para>Force color or black and white mode. The color mode can not be
+          forced if corresponding <productname>curses</productname> functions
+          indicate the terminal is color blind.</para>
+        </refsect2>
+      </refsect1>
+    </refentry>
+  </reference>
+</book>
