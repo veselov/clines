@@ -28,4 +28,4 @@
 * Support command line options
 * Workaround nasty ALTLinux/Debian GPM bug
 * Persist high scores
-
+* Added man page
