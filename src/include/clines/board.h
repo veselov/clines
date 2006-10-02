@@ -47,7 +47,7 @@ typedef struct board {
     
 } board;
 
-void add(board *);
+int add(board *);
 
 /*
  * before calling reset, set w and h

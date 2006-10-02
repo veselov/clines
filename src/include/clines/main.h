@@ -47,7 +47,8 @@ extern int color_mode;
 #define CM_COLOR    2
 
 extern char * bw_font;
-#define DEFAULT_BW_FONT     "*OVA.Zova'z"
+// #define DEFAULT_BW_FONT     "*OVA.Zova'z"
+#define DEFAULT_BW_FONT     "*OoVvAa.'Zz"
 
 extern int * chips_colors;
 
