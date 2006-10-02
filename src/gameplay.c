@@ -78,11 +78,9 @@ void play(board * b) {
 
     while (1) {
 
-	add(b);
-
-	if (!b->av) {
-	    break;
-	}
+	if (!add(b)) {
+            break;
+        }
 
         scored_moves_count = 0;
 
@@ -96,10 +94,6 @@ void play(board * b) {
                 break;
             }
             scored_moves_count++;
-	}
-
-	if (b->av < b->nev) {
-	    break;
 	}
     }
 

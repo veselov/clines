@@ -27,7 +27,6 @@ int score = 0;
 int hi_score = 0;
 int my_hi_score = 0;
 int color_mode = CM_AUTO;
-int allow_hi_score = 1;
 int * chips_colors;
 char * hi_score_who = (char*)NULL;
 char * my_user = (char*)NULL;
@@ -35,8 +34,14 @@ char * command_codes = (char*)"hjkl ";
 char * color_font = (char*)"IOo";
 char * bw_font = (char*)NULL;
 
+#ifdef ALLOW_HI_SCORES
 static int saved_hi_score = 0;
 static int saved = 0;
+int allow_hi_score = 1;
+#else
+int allow_hi_score = 0;
+#endif
+
 
 static int arg_width = 9;
 static int arg_height = 9;
@@ -195,6 +200,8 @@ void suspend_timer() {
 
 void load_hi_score() {
 
+#ifdef ALLOW_HI_SCORES
+
     DIR * dir;
     struct dirent * next;
     int min_len;
@@ -288,6 +295,7 @@ void load_hi_score() {
     }
 
     closedir(dir);
+#endif /* ALLOW_HI_SCORES */
 }
 
 void who_am_i() {
@@ -300,11 +308,17 @@ void who_am_i() {
     if (me) {
         my_user = me->pw_name;
     }
-    
+
+    if (strchr(my_user, '/')) {
+        // I don't want to allow username with slashes.
+        my_user = (char*)NULL;
+    }
 }
 
 void save_hi_score() {
 
+#ifdef ALLOW_HI_SCORES
+    
     int path_len;
     char * full_path;
     int fd;
@@ -367,6 +381,9 @@ void save_hi_score() {
     } else {
         fprintf(stdout, "New personal record saved!\n");
     }
+
+#endif /* ALLOW_HI_SCORES */
+
 }
 
 void prargs() {
@@ -376,7 +393,9 @@ void prargs() {
 "       [-f<S>] [-F<S>] [-m{c|b}] [-n<N>] [-N<N>] [-o<C>]\n"
 "\n"
 "  -h           See this help and exit\n"
+#ifdef ALLOW_HI_SCORES
 "  -l           List high scores and exit\n"
+#endif /* ALLOW_HI_SCORES */
 "  -v           Print version number and exit\n"
 "  -w<width>    Specify alternative width (default is 9)\n"
 "  -t<height>   Specify alternative height (default is 9)\n"
@@ -403,6 +422,7 @@ void prargs() {
 "               assigned in the same manner, white (7) assigned for cursor\n"
 "               and then colors starting from 1 are assigned for chips\n"
 "               if the assigned color is white (7), it's skipped over.\n"
+"  -m{c|b}      Force color or black and white mode.\n"
 "\n"
 "If board is customized, hi scores will not be loaded or saved\n");
 }
@@ -418,10 +438,12 @@ int parse_options(int argc, char ** argv) {
             case 'h':   // help
                 prargs();
                 exit(0);
+#ifdef ALLOW_HI_SCORES
             case 'l':   // list scores
                 arg_so = 1;
                 allow_hi_score = 1;
                 return 0;
+#endif /* ALLOW_HI_SCORES */
             case 'v':   // version
                 fprintf(stdout, "%s\n", PACKAGE_STRING);
                 exit(0);

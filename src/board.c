@@ -19,7 +19,7 @@ void reset(board * b) {
     b->con = 1;
 }
 
-void add(board * b) {
+int add(board * b) {
 
     int i;
     int nev = b->played?b->nev:b->first_nev;
@@ -28,6 +28,10 @@ void add(board * b) {
 
     b->rec->len = 0;
     b->played = 1;
+
+    if (b->av < nev) {
+        return 0;
+    }
 
     for (i=0; i<nev; i++) {
 
@@ -64,6 +68,7 @@ void add(board * b) {
     }
 
     b->av -= nev;
+    return nev+1;
 }
 
 int myrand(int lim) {

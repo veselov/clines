@@ -431,11 +431,13 @@ void rscore(board *b) {
 }
 
 char get_jumping_code(int val) {
-    return bw_font[(val-1) * 2 + 1];
+    // return bw_font[(val-1) * 2 + 1];
+    return bw_font[(val-2) * 2 + 2];
 }
 
 char get_char_code(int val) {
-    return bw_font[val-1];
+    if (val == 1) { return bw_font[0]; }
+    return bw_font[(val-2)*2+1];
 }
 
 void bw_font_checks_out(board * b) {
