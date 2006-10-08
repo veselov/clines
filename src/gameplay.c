@@ -147,7 +147,7 @@ void do_move(board * b) {
             op = OP_MOUSE;
         }
 
-        if (c == KEY_DOWN || c == command_codes[CC_LEFT]) {
+        if (c == KEY_DOWN || c == command_codes[CC_DOWN]) {
             op = OP_DOWN;
         } else if (c == KEY_UP || c == command_codes[CC_UP]) {
             op = OP_UP;
