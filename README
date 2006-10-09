@@ -24,10 +24,10 @@ Building from CVS tree:
     make
 
 
-Information below is obsolete,
-refer to the man page instead.
-------------------------------
-vvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+============== Information below is obsolete, ==============
+============== refer to the man page instead. ==============
+============== ------------------------------ ==============
+============== vvvvvvvvvvvvvvvvvvvvvvvvvvvvvv ==============
 
 Playing:
 -------
@@ -52,7 +52,7 @@ chip from one cell to another, given that there is an unobstructed path between
 such two cells, that can be walked by moving the chip strictly horizontally or
 vertically. After the player's move, the board is checked for the lengths of
 adjacent chips of the same color. If any such lengths in amount of 5 or more
-chips are found (in any direction, horinontal, vertical or diagonal), all chips
+chips are found (in any direction, horizontal, vertical or diagonal), all chips
 in these lengths are expelled from the board, the computer skips it's move, and
 control goes back to the player. If no chips were expelled, the computer places
 another 3 chips, choosing random color and position, and the chip lenghts are
