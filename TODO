@@ -2,3 +2,8 @@
 For clines 1.0 rel:
 
 * auto play
+* use sharedstatedir for high scores
+* optimize path
+* fix fgets()
+  (glibc2 doesn't like results being thrown away)
+
