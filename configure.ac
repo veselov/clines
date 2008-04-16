@@ -1,5 +1,5 @@
-AC_INIT(clines, 1.0.4, Pawel.Veselov@gmail.com)
-AC_PREREQ(2.59)
+AC_INIT(clines, 1.0.5, Pawel.Veselov@gmail.com)
+AC_PREREQ(2.61)
 AM_MAINTAINER_MODE
 AM_INIT_AUTOMAKE
 AC_CONFIG_HEADERS(clines-config.h)
