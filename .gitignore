@@ -30,3 +30,13 @@
 
 # Debug files
 *.dSYM/
+
+.deps/
+stamp-h1
+clines-config.h*
+autom4te.cache/
+Makefile
+clines
+config.log
+config.status
+version

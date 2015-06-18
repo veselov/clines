@@ -1,0 +1,186 @@
+'\" t
+.\"     Title: clines
+.\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
+.\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
+.\"      Date: 06/18/2015
+.\"    Manual: Clines MAN page
+.\"    Source: [FIXME: source]
+.\"  Language: English
+.\"
+.TH "CLINES" "6" "06/18/2015" "[FIXME: source]" "Clines MAN page"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+clines \- Console Lines Game
+.SH "SYNOPSIS"
+.HP \w'\fBclines\fR\ 'u
+\fBclines\fR [\fB\-hlv\fR] [\fB\-w\fR\fB\fIN\fR\fR] [\fB\-t\fR\fB\fIN\fR\fR] [\fB\-c\fR\fB\fIN\fR\fR] [\fB\-i\fR\fB\fIN\fR\fR] [\fB\-C\fR\fB\fIS\fR\fR] [\fB\-f\fR\fB\fIS\fR\fR] [\fB\-F\fR\fB\fIS\fR\fR] [[\-mb] | [\-mc]] [\fB\-n\fR\fB\fIN\fR\fR] [\fB\-N\fR\fB\fIN\fR\fR] [\fB\-o\fR\fB\fIC\fR\fR]
+.SH "DESCRIPTION"
+.PP
+CLines is a console puzzle game\&.
+.SS "Game Rules"
+.PP
+The game runs on a rectangular board, with evenly distributed cells\&. By default, the board consists of 9 by 9 cells\&. Every cell can be either empty or occupied by a chip\&. At the start of the game, a fixed number of chips (3 by default) is randomly thrown on the board\&. The turn is then given to the player\&. Every turn, player has to select a chip and move it onto a free cell on the board, and there has to be an unobscured path between the selected chip and the selected empty cell, having the chip only moving vertically or horizontally\&. After the player\*(Aqs turn, the whole board is scanned to determine if any chips of the same color form a long enough straight line (by default 5 chips), then all such chips are removed from the board\&. When the chips are considered for removal, a single chip may be a part of one or more straight lines\&. If at least one chip was removed, the control is immediately returned to the player\&. Otherwise the computer then makes it\*(Aqs turn, throwing more chips on the board (again, 3 by default)\&. Then the board is again checked for any lines of chips to remove, before returning the turn to the player\&. The objective of the game is to prevent the board from filling up completely for as long as possible\&. The game ends when computer doesn\*(Aqt have enough room to place all chips for it\*(Aqs move\&.
+.SS "Scoring"
+.PP
+Anytime chips are removed from the board, the players receives points\&. There is a minimum limit of chips required to be in a line to be removed at all (5 by default)\&. The points are awarded, whether the chips are removed after the player\*(Aqs or computer\*(Aqs move\&. For every expelled chip, up to the minimum amount, one point is awarded\&. If more than minimum amount of chips were removed, then player gets additional points, as many as there are chips removed, multiplied by the amount of the extra chips removed\&. If the player is successful in removing any chips for two or more turns consecutively, additional points also awarded, in the amount of such moves minus one, squared\&. So, the total amount of awarded points is:
+.PP
+b * b + n * (n \- min)
+.PP
+Where
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fImin\fR
+is the minimum elements in a line
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fIn\fR
+is the amount of chips being removed this turn
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+\fIb\fR
+is the award for consecutive scoring (0 for first turn, 1 for second, etc\&.)\&.
+.RE
+.sp
+In other words, it\*(Aqs better to remove chips in consecutive turns, without letting computer to take it\*(Aqs turn, and it\*(Aqs really sweet to remove large clusters of chips\&. The most usual example of a larger cluster is to either have a very long straight line, or to have one or more lines join at a single cell, where the chip is placed last, like building a letter
+V, filling in the bottom tip in the very end\&.
+.PP
+If so compiled and configured, the game will save it\*(Aqs high score for every user who plays the game\&. The top high score is displayed below the game board\&. Players score are always displayed in the left top corner, if any\&. When the game ends, the players latest score is saved as a personal record, if beaten\&. If the game\*(Aqs confiugration is changed from the defaults (one of
+\fBwtcinN\fR
+options specified with a non\-default value), the high score function is disabled\&. The record score is saved when the game stops because player looses the game, or player decides quits the game (including stopping the game with
+\fBSIGQUIT\fR
+or
+\fBSIGINT\fR
+signals)\&.
+.SS "Game Control"
+.PP
+The game is controlled with the keyboard or mouse, if your curses library has mouse support (or running on some UNIX(tm) console with running
+gpm(TM))\&. If you see the mouse cursor, that may not mean that the game can be controlled with the mouse\&. To determine if it can be, move your mouse pointer over the middle of any empty cell on the board, and click left mouse button\&. If the text cursor dissapears, you can control the game with the mouse\&. With the mouse, the interface is simple, point and click on the chip you would like to move, then click on another chip to change you mind, on the same chip to clear the selection, or to an empty cell to move the chip\&. If the selected empty cell has no unobscured path from the cell with the selected chip is, the game will beep (depending on your curses library, terminal, and audio device support), and the chip will remain selected\&. Selected chip is "jumping" in it\*(Aqs cell\&. With keyboard, by default, the keyboard arrow buttons should move the cursor around\&. Space bar either selects a chip, clears the current selection, or moves currently selected chip to an unoccupied cell\&. Attempt to select a chip when another chip is already selected simply changes the currently selected chip\&. The cursor arrows are duplicated with
+h
+to move left,
+l
+to move right,
+k
+to move up, and
+j
+to move down\&. The key
+q
+stops the program\&.
+.SH "OPTIONS"
+.PP
+Various options can be passed to the game program to modify the conditions of the game, or it\*(Aqs presentation\&.
+.SS "\-h"
+.PP
+A short help message is displayed, and program terminates\&.
+.SS "\-l"
+.PP
+Currently record high scores are displayed, and program terminates\&.
+.SS "\-v"
+.PP
+Version information is displayed, and program terminates\&.
+.SS "\-w \fI<number>\fR"
+.PP
+Specify board width (default is is
+\fB9\fR)\&.
+.PP
+Since both
+\fB\-t\fR
+and
+\fB\-w\fR
+options change the size of the board, it can be displayed differently on your terminal\&. It\*(Aqs possible your terminal would have not enough width or height to display the board, in which case an error message will be displayed\&. If the terminal is resized during the gameplay, the board will be redisplayed, unless it doesn\*(Aqt fit into the new terminal size\&. In this case a corresponding message will be displayed, and game will not resume until the terminal is resized properly\&. If only one character can be used to display a cell, game work in the "mini mode", which changes how the chips behave when they are selected\&.
+.SS "\-t \fI<number>\fR"
+.PP
+Specify board height (default is
+\fB9\fR)\&.
+.SS "\-c \fI<number>\fR"
+.PP
+Specify how many colors to use (default is
+\fB5\fR)\&.
+.PP
+Note that most commonly used terminals have limit on how many colors they can define and display distinctly\&. Specifying too large value here may lead to an error message if the colors can not be allocated, or may result in chips of different colors to look the same to the user\&. If the game runs in black and way mode, and the specifed value is over the default, then the
+\fB\-F\fR
+option must also be specified to provide a custom font\&.
+.SS "\-i \fI<number>\fR"
+.PP
+Specify the minimum number of chips that can be removed if aligned in a straight line (default is
+\fB5\fR)\&. Now, setting this value to anything that is larger than width or height of the board will effectively make it impossible to score any points\&.
+.SS "\-C \fI<string>\fR"
+.PP
+Specify the characters to be used to perform the game actions in the order of LEFT, DOWN, UP, RIGHT, ACTION\&. The default is
+\fB"hjkl "\fR\&. The behavior of the character
+\fBq\fR
+can be overwritten by this option, in which case use
+Ctrl\-C
+or
+Ctrl\-\e
+to quit the game\&.
+.SS "\-f \fI<string>\fR"
+.PP
+Specify color "font"\&. The specified string should be three characters long\&. First character is used to draw cursor, second character is used to draw the chips, and the third is used to draw selected chips in the mini mode\&. The default is
+\fB"IOo"\fR\&. This option is ignored in black and white mode\&.
+.SS "\-F \fI<string>\fR"
+.PP
+Specify black and white "font"\&. The first character in the specified string is used to draw the cursor\&. The rest of the string specify characters to use for each different "color" of the chip\&. One character for regular display, another for displaying jumping chip in the mini mode\&. The default is
+\fB"*OoVvAa\&.\*(AqZz"\fR\&. This option is ignored in the color mode\&. There should be enough character for the specified number of various chips\&. This option has to be specified if
+\fB\-c\fR
+option was specified and has a value larger than the default\&.
+.SS "\-n \fI<string>\fR"
+.PP
+Specify how many chips appear after every computer turn, except for the initial turn\&. Default is
+\fB3\fR\&.
+.SS "\-N \fI<number>\fR"
+.PP
+Specify how many chips to appear before player\*(Aqs first move\&. Default is
+\fB3\fR\&. This has to be at least
+\fB1\fR\&.
+.SS "\-o \fI<colors>\fR"
+.PP
+Specify comma separated color numbers to use for chips and cursor, in color mode only\&. By default it\*(Aqs
+\fB7,1,2,3,4,5\fR\&. The first color is always for the cursor\&. The rest are for chips\&. If the amount of various chips is changed through
+\fB\-c\fR
+option, then, by default, the colors are assigned to the chips in the same manner: white (7) assigned for the cursor, and then consecutive colors, starting from 1 and up are assigned to the chips, skipping over white color\&.
+.SS "\-m \fI{c|b}\fR"
+.PP
+Force color or black and white mode\&. The color mode can not be forced if corresponding
+curses(TM)
+functions indicate the terminal is color blind\&.

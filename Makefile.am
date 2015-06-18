@@ -1,5 +1,5 @@
 
-AUTOMAKE_OPTIONS = 1.9
+AUTOMAKE_OPTIONS = 1.14 subdir-objects
 EXTRA_DIST = version src/include clines-man.xml
 
 bin_PROGRAMS = clines
