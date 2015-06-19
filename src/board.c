@@ -6,9 +6,9 @@
  * version: $Revision$
  */
 
-#include <clines/sysi.h>
-#include <clines/board.h>
-#include <clines/render.h>
+#include "clines/sysi.h"
+#include "clines/board.h"
+#include "clines/render.h"
 
 static int myrand(int);
 

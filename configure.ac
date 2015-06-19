@@ -36,6 +36,16 @@ curses)
 esac
 AC_MSG_RESULT($ucurses)
 
+AC_CHECK_FUNCS([bzero],[],[ AC_MSG_FAILURE([need bzero]) ])
+AC_CHECK_FUNCS([memset],[],[AC_MSG_FAILURE([need memset])])
+AC_CHECK_FUNCS([strchr],[],[AC_MSG_FAILURE([need strchr])])
+AC_CHECK_FUNCS([strdup],[],[AC_MSG_FAILURE([need strdup])])
+AC_CHECK_FUNCS([strtol],[],[AC_MSG_FAILURE([need strtol])])
+# AC_FUNC_MALLOC([],[AC_MSG_FAILURE([need malloc])])
+# AC_FUNC_REALLOC([],[AC_MSG_FAILURE([need realloc])])
+AC_TYPE_SIZE_T([],[AC_MSG_FAILURE([need size_t])])
+AC_TYPE_UID_T([],[AC_MSG_FAILURE([need uid_t])])
+
 AC_CHECK_HEADERS(stdio.h)
 AC_CHECK_HEADERS(string.h)
 AC_CHECK_HEADERS(strings.h)
@@ -55,6 +65,19 @@ AC_CHECK_HEADERS(pwd.h)
 AC_HEADER_TIME
 AC_CHECK_HEADERS(stdarg.h)
 AC_CHECK_HEADERS(gpm.h)
+AC_SEARCH_LIBS([clock_gettime],[rt posix4])
+AC_CHECK_FUNCS([clock_gettime])
+
+
+AC_MSG_CHECKING([Checking for CLOCK_MONOTONIC_RAW])
+AC_TRY_COMPILE([
+                #include <time.h>
+                ], [
+                        struct timespec tp;
+                        uint64_t want64;
+                        clock_gettime(CLOCK_MONOTONIC_RAW, &tp);
+
+                    ],[AC_MSG_RESULT([yes]) AC_DEFINE(HAVE_MONOTONIC_RAW,[],[Have raw monotonic clock])],[AC_MSG_RESULT([no])]);
 
 if test $fixed_curses = 1; then
     lcurses=$ucurses
@@ -112,7 +135,7 @@ if test `uname` = SunOS -a $lcurses = curses; then
     AC_MSG_RESULT([yes, trying xpg4])
     LDFLAGS="-L/usr/xpg4/lib -L/usr/xpg4/lib/sparcv9 -R/usr/xpg4/lib/sparcv9 -R/usr/xpg4/lib $LDFLAGS"
     CFLAGS="-I/usr/xpg4/include $CFLAGS"
-    AC_DEFINE(NO_SAVE_TTY, [], [If set, don't use savetty/resetty])
+    AC_DEFINE(NO_SAVE_TTY, [], [If set, do not use savetty/resetty])
 else
     AC_MSG_RESULT([no])
 fi
@@ -120,30 +143,41 @@ fi
 AC_MSG_CHECKING([for OpenBSD])
 if test `uname` = OpenBSD; then
     AC_MSG_RESULT([yes, do not use savetty])
-    AC_DEFINE(NO_SAVE_TTY, [], [If set, don't use savetty/resetty])
+    AC_DEFINE(NO_SAVE_TTY, [], [If set, do not use savetty/resetty])
 else
     AC_MSG_RESULT([no])
 fi
 
 AC_CHECK_LIB($lcurses, color_set, [], [
     AC_MSG_ERROR([
-Your curses library is so puny it doesn't support colors.
+Your curses library is so puny it does not support colors.
 Please switch to a better curses library. If you are compiling
 on Solaris, one in /usr/xpg4 may be a lot better, but I could not find it
     ])
 ])
 
 AC_ARG_ENABLE([debug], AS_HELP_STRING([--enable-debug], [Compile with debug (disabled by default)]), [
-    CFLAGS="$CFLAGS -g"
+    CFLAGS="$CFLAGS -g -O0"
     debug_on=yes
 ], [debug_on=no])
 
+AC_ARG_ENABLE([efence], AS_HELP_STRING([--enable-efence], [Compile with libefence (disabled by default)]), [
+    LDFLAGS="$LDFLAGS -lefence"
+    efence_on=yes
+], [efence_on=no])
+
 AC_ARG_ENABLE([hiscores], AS_HELP_STRING([--enable-hiscores],
-        [Enable hi scores (enable by default)]),
+        [Enable hi scores (enabled by default)]),
     [], [enable_hiscores=yes])
 
 AC_MSG_CHECKING([if debugging should be included])
 AC_MSG_RESULT([$debug_on])
+
+if test "efence_on" = "yes"; then
+    AC_CHECK_LIB([efence], [malloc], [], [
+        AC_MSG_FAILURE([efence library not found])
+    ])
+fi
 
 case $hcurses in
 ncursesw)

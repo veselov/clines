@@ -13,13 +13,18 @@
 
 struct board;
 
-#define	snew(x)	    (x*)malloc(sizeof(x))
+#define	snew(x)	    (x*)fmalloc(sizeof(x))
 
-void fatal(char * fmt, ...);
-void quit(void);
+extern void fatal(char * fmt, ...);
+extern void quit(void);
 
-void suspend_timer();
-void resume_timer();
+extern void suspend_timer();
+extern void resume_timer();
+
+extern void * fmalloc(size_t);
+extern void * frealloc(void *,size_t);
+
+#define DBG(a,b...) do { if (is_debug) { fprintf(debug_file, a "\n" , ## b); } } while(0)
 
 #define	mmin(a,b)   ((a)>(b)?(b):(a))
 
@@ -28,6 +33,8 @@ extern int hi_score;
 extern int my_hi_score;
 extern char * hi_score_who;
 extern int allow_hi_score;
+extern int is_debug;
+extern FILE * debug_file;
 
 extern char * command_codes;
 #define CC_LEFT     0
@@ -47,7 +54,6 @@ extern int color_mode;
 #define CM_COLOR    2
 
 extern char * bw_font;
-// #define DEFAULT_BW_FONT     "*OVA.Zova'z"
 #define DEFAULT_BW_FONT     "*OoVvAa.'Zz"
 
 extern int * chips_colors;

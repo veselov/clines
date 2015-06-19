@@ -6,11 +6,11 @@
  * version: $Revision$
  */
 
-#include <clines/sysi.h>
-#include <clines/board.h>
-#include <clines/render.h>
-#include <clines/play.h>
-#include <clines/main.h>
+#include "clines/sysi.h"
+#include "clines/board.h"
+#include "clines/render.h"
+#include "clines/play.h"
+#include "clines/main.h"
 
 #ifndef KEY_MOUSE
 #define KEY_MOUSE 0631
@@ -26,6 +26,19 @@
 #define OP_ACT      6
 #define OP_QUIT     7
 #define OP_CLS      8
+
+#ifdef HAVE_MONOTONIC_RAW
+uint64_t currentms() {
+
+    struct timespec tp;
+
+    clock_gettime(CLOCK_MONOTONIC_RAW, &tp);
+
+    return ((uint64_t)tp.tv_sec) * 1000ULL +
+        tp.tv_nsec / 1000000ULL;
+
+}
+#endif
 
 typedef struct direc {
     int dx;
@@ -512,93 +525,171 @@ int m_south(board * b, int n) {
 #define	GO_SOUTH    1
 #define	GO_WEST	    2
 #define	GO_EAST	    3
+#define	ALL_DIRS    0xf
 
 int p_add(board * b, int no, int tgt) {
 
-    int ngb[4];
-    int nptr = 0;
-    int i;
+    struct memory {
+        int dirs;
+        int coordinate;
+    };
 
-    // default : N S W E
-    unsigned char rule[4];
-    int rn = 0;
+    // we won't have more moves than the size of the board.
+    struct memory stack[b->w*b->h];
+    int stack_next = 1;
+    char marked[b->w*b->h];
+    int cost[b->w*b->h];
+    int distance;
+    int tgtY = tgt / b->w;
+    int aux;
 
-    int aux = no % b->w;
-    int bux = tgt % b->w;
+    int hits = 0;
+    int cuts = 0;
+    int cost_cuts = 0;
+    int cost_adj = 0;
+    int pushes = 0;
+#ifdef HAVE_MONOTONIC_RAW
+    uint64_t time = currentms();
+#endif
 
-    // select priority in direction
+    pset route;
 
-    if (aux > bux) { // need west
-	rule[rn++] = GO_WEST;
-    } else if (aux < bux) {
-	rule[rn++] = GO_EAST;
-    }
+    route.len = 0;
+    route.path = 0;
 
-    if (no > tgt) { // past, go north
-	rule[rn++] = GO_NORTH;
-    } else if (no < tgt) {
-	rule[rn++] = GO_SOUTH;
-    }
+    memset(marked, 0, b->w*b->h);
+    memset(cost, 0, b->w*b->h*sizeof(int));
 
-    for (i=0; i<4; i++) {
+    stack[0].dirs = 0;
+    stack[0].coordinate = no;
+    marked[no] = 1;
 
-	if (memchr(rule, (unsigned char)i, rn)) {
-	    continue;
-	}
+    // minimal distance between the two points.
 
-	rule[rn++] = (unsigned char)i;
+    distance = tgt / b->w - no / b->w;
+    if (distance < 0) { distance = -distance; }
+    aux = tgt%b->w - no%b->w;
+    if (aux < 0) { aux = -aux; }
+    distance += aux;
 
-    }
+    while (1) {
 
-    // two bits set
+        if (stack_next <= 0) { break; }
 
-    for (i=0; i<4; i++) {
-	if (f_check[rule[i]](b, no)) {
-	    int pt = f_addr[(int)rule[i]](b, no);
-	    if (!b->board[pt]) {
-		ngb[nptr++] = pt;
-	    }
-	}
-    }
+        struct memory * cur = &stack[stack_next-1];
+        // where can we go next
+        int dir = cur->dirs;
+        int loc = cur->coordinate;
+        int locY = loc / b->w;
+        if (dir == ALL_DIRS) {
+            marked[loc] = 0;
+            stack_next--;
+            continue;
+        }
 
-    for (i=0; i<nptr; i++) {
-	// was it recorded ?
-        /*
-         * old code : had to be changed when 
-         * b->set->path became integer, not character
-	if (memchr(b->set->path, ngb[i], b->set->len)) {
-	    ngb[i] = -1;
-	    continue;
-	}
-        */
-        int j;
-        for (j=0; j<b->set->len; j++) {
-            if (b->set->path[j] == ngb[i]) {
-                ngb[i] = -1;
-                break;
+        if (locY < tgtY && !(dir & (1<<GO_SOUTH))) {
+            dir = GO_SOUTH;
+        } else if (locY > tgtY && !(dir & (1<<GO_NORTH))) {
+            dir = GO_NORTH;
+        } else if (loc < tgt && !(dir & (1<<GO_EAST))) {
+            dir = GO_EAST;
+        } else if (loc > tgt && !(dir & (1<<GO_WEST))) {
+            dir = GO_WEST;
+        } else {
+            int next_dir = GO_NORTH;
+            while (dir & 1) {
+                dir>>=1;
+                next_dir++;
+            }
+            dir = next_dir;
+        }
+
+        cur->dirs |= (1<<dir);
+
+        if (f_check[dir](b, loc)) {
+
+            int loc2 = loc;
+
+            loc = f_addr[dir](b, loc);
+
+            // printf("%d, dir %d, going to %d\n\r", loc2, dir, loc);
+
+            if (!b->board[loc] && !marked[loc]) {
+                // we can go there!
+
+                // but is it the target?
+                if (loc == tgt) {
+                    hits++;
+                    // fprintf(stderr, "location hit, len:%d, best len: %d, distance:%d\n\r", stack_next, route.len, distance);
+                    // we got ourselves a valid path,
+                    // let's save it.
+                    if (!route.len || route.len > stack_next) {
+                        int i,j;
+                        if (!route.len) {
+                            route.path = fmalloc(stack_next * sizeof(int));
+                        }
+                        route.len = stack_next;
+                        for (i=1,j=stack_next-1; i<stack_next; i++,j--) {
+                            route.path[j] = stack[i].coordinate;
+                        }
+                        route.path[0] = loc;
+                        // if the path that we found is minimal distance
+                        // then we don't need to search further.
+                        if (route.len == distance) { break; }
+                    }
+                } else {
+
+                    // if we have found a solution, and we know
+                    // we won't be able to improve from this point on,
+                    // then let's not even try.
+                    if (!route.len || stack_next < route.len) {
+
+                        // now, let's check/establish the cost.
+                        if (!cost[loc] || stack_next < cost[loc]) {
+                            if (cost[loc]) {
+                                cost_adj++;
+                            }
+                            cost[loc] = stack_next;
+                            pushes++;
+                            cur = &stack[stack_next++];
+                            cur->dirs = 0;
+                            cur->coordinate = loc;
+                            marked[loc] = 1;
+                        } else {
+                            cost_cuts++;
+                        }
+
+                    } else {
+                        cuts++;
+                    }
+                }
             }
         }
-        if (ngb[i] == -1) { continue; }
-
-
-	if (ngb[i] == tgt) {
-	    return 1;
-	}
-
-	b->set->path[b->set->len++] = ngb[i];
     }
 
-    for (i=0; i<nptr; i++) {
-	// was it recorded ?
-	
-	if (ngb[i] >= 0) {
-	    if (p_add(b, ngb[i], tgt)) {
-		b->path->path[b->path->len++] = ngb[i];
-		return 1;
-	    }
-	}
+    DBG("From %d to %d : %d hits, %d cuts, %d cost cuts, %d cust adj, %d pushes, %sfound"
+#ifdef HAVE_MONOTONIC_RAW
+            " took %llums"
+#endif
+            
+            ,
+            no, tgt, hits, cuts, cost_cuts, cost_adj, pushes, route.len?"":"NOT "
+
+#ifdef HAVE_MONOTONIC_RAW
+            ,currentms() - time
+#endif
+            
+            );
+
+    if (route.len) {
+        b->path->len = route.len;
+        memcpy(b->path->path, route.path, sizeof(int) * route.len);
+        free(route.path);
+        return 1;
     }
+
     return 0;
+
 }
 
 board * c_board = NULL;

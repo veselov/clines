@@ -6,11 +6,11 @@
  * version: $Revision$
  */
 
-#include <clines/sysi.h>
-#include <clines/main.h>
-#include <clines/board.h>
-#include <clines/render.h>
-#include <clines/play.h>
+#include "clines/sysi.h"
+#include "clines/main.h"
+#include "clines/board.h"
+#include "clines/render.h"
+#include "clines/play.h"
 
 #ifndef CLINES_DATA_DIR
 #define CLINES_DATA_DIR "/var/tmp"
@@ -33,6 +33,8 @@ char * my_user = (char*)NULL;
 char * command_codes = (char*)"hjkl ";
 char * color_font = (char*)"IOo";
 char * bw_font = (char*)NULL;
+int is_debug = 0;
+FILE * debug_file = 0;
 
 #ifdef ALLOW_HI_SCORES
 static int saved_hi_score = 0;
@@ -41,7 +43,6 @@ int allow_hi_score = 1;
 #else
 int allow_hi_score = 0;
 #endif
-
 
 static int arg_width = 9;
 static int arg_height = 9;
@@ -112,16 +113,16 @@ int main(int argc, char ** argv) {
 
     srand(time(NULL));
 
-    game->board = (int*)malloc(game->w*game->h*sizeof(int));
+    game->board = (int*)fmalloc(game->w*game->h*sizeof(int));
     bzero(game->board, game->w * game->h * sizeof(int));
     game->set = snew(pset);
     game->rec = snew(pset);
     game->path = snew(pset);
     game->rec->len = 0;
-    game->rec->path = (int*)malloc(sizeof(int) * (game->nev>game->first_nev?
+    game->rec->path = (int*)fmalloc(sizeof(int) * (game->nev>game->first_nev?
             game->nev:game->first_nev));
-    game->set->path = (int*)malloc(sizeof(int) * game->w*game->h);
-    game->path->path = (int*)malloc(sizeof(int) * game->w*game->h);
+    game->set->path = (int*)fmalloc(sizeof(int) * game->w*game->h);
+    game->path->path = (int*)fmalloc(sizeof(int) * game->w*game->h);
 
     reset(game);
     rinit(game, 1);
@@ -180,6 +181,10 @@ void quit() {
     rfini();
 
     save_hi_score();
+
+    if (debug_file) {
+        fclose(debug_file);
+    }
     
     fflush(stdout);
     fprintf(stdout, "Scores earned : %d\n", score);
@@ -235,7 +240,7 @@ void load_hi_score() {
         }
 
         slen = namlen + cdd_len + 2;
-        full_path = (char*)malloc(slen);
+        full_path = (char*)fmalloc(slen);
         if (!full_path) { break; } // really sad that is
         bzero(full_path, slen);
         snprintf(full_path, slen, "%s/%s", CLINES_DATA_DIR, next->d_name);
@@ -342,7 +347,7 @@ void save_hi_score() {
     path_len = strlen(CLINES_DATA_DIR) + 2 +
         strlen(my_user) + strlen(CSCORE_EXT);
 
-    full_path = (char*)malloc(path_len);
+    full_path = (char*)fmalloc(path_len);
 
     if (!full_path) {
         // you think fprintf will work ? :)
@@ -431,7 +436,7 @@ int parse_options(int argc, char ** argv) {
 
     int c;
 
-    while ( (c = getopt(argc, argv, "hlvw:t:c:i:C:f:F:m:n:N:o:")) != -1) {
+    while ( (c = getopt(argc, argv, "hlvw:t:c:i:C:f:F:m:n:N:o:D")) != -1) {
 
         switch (c) {
 
@@ -490,7 +495,7 @@ int parse_options(int argc, char ** argv) {
             case 'n':   // new chips
                 {
                     int aux = 0;
-                    if (optarg && (aux = atoi(optarg)) > 0 &&
+                    if (optarg && (aux = atoi(optarg)) >= 0 &&
                             arg_cpt != aux) {
                         arg_cpt = aux;
                         allow_hi_score = 0;
@@ -555,6 +560,14 @@ int parse_options(int argc, char ** argv) {
                 }
                 arg_color_set = strdup(optarg);
                 break;
+            case 'D':
+                debug_file = fopen("clines.debug", "w");
+                if (!debug_file) {
+                    perror("create clines.debug");
+                    return 1;
+                }
+                is_debug = 1;
+                break;
             default:
                 return 1;
         }
@@ -564,7 +577,7 @@ int parse_options(int argc, char ** argv) {
 
 int color_set_checksout() {
 
-    chips_colors = (int*)malloc(sizeof(int) * (arg_colors+1));
+    chips_colors = (int*)fmalloc(sizeof(int) * (arg_colors+1));
 
     if (!arg_color_set) {
         int i;
@@ -656,4 +669,25 @@ int color_set_checksout() {
         return 0;
 
     }
+}
+
+void * frealloc(void * ptr, size_t sz) {
+    ptr = realloc(ptr, sz);
+    if (!ptr) {
+        fprintf(stderr, "out of memory");
+        _exit(2);
+    }
+    return ptr;
+}
+
+void * fmalloc(size_t sz) {
+
+    void * r = malloc(sz);
+    if (!r) {
+        fprintf(stderr, "out of memory");
+        _exit(2);
+    }
+
+    return r;
+
 }

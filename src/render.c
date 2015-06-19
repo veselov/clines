@@ -6,11 +6,11 @@
  * version: $Revision$
  */
 
-#include <clines/sysi.h>
-#include <clines/board.h>
-#include <clines/render.h>
-#include <clines/main.h>
-#include <clines/play.h>
+#include "clines/sysi.h"
+#include "clines/board.h"
+#include "clines/render.h"
+#include "clines/main.h"
+#include "clines/play.h"
 
 int r_can_render = 1;
 int r_has_color;
@@ -207,8 +207,8 @@ void render1_full(board * b, int x, int y) {
 }
 
 void rfini() {
-    int nis, y;
-    getmaxyx(stdscr, y, nis);
+    int unused, y;
+    getmaxyx(stdscr, y, unused);
     erase();
     refresh();
     doupdate();
