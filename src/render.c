@@ -275,6 +275,7 @@ void rinit(board * b, int first_time) {
     }
 
     noecho();
+    curs_set(0);
     keypad(stdscr, TRUE);
 
     getmaxyx(stdscr, y, x);
